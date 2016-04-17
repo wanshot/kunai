@@ -3,18 +3,18 @@
 import curses
 import signal
 import unicodedata
-from rc import *
+from .manage import ConfigLoader
 
 
 class Screen(object):
 
     def __init__(self, ret):
-        self.input_field_label = 'Input:'
+        self.conf = ConfigLoader()
 
 #     def __enter__(self):
         self.stdscr = curses.initscr()
         curses.start_color()
-        # Invalidation Ctl + z
+        # Invalidation Ctrl + z
         signal.signal(signal.SIGINT, lambda signum, frame: None)
         curses.raw()
         curses.noecho()
@@ -38,9 +38,10 @@ class Screen(object):
         self.stdscr.move(0, 6)
 
     def _set_input_area(self):
-        if 'INPUT_FIELD_LABEL' in globals():
-            self.input_field_label = INPUT_FIELD_LABEL
-        self.stdscr.addstr(0, 0, '{}'.format(self.input_field_label))
+        label = 'input:'
+        if self.conf.input_field_label:
+            label = self.conf.input_field_label
+        self.stdscr.addstr(0, 0, '{}'.format(label))
 
     def _adapt_line(self, line):
         unicodelize = line.decode('utf-8')

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import curses
 import locale
-from screen import Screen
+from .screen import Screen
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -11,6 +12,8 @@ class Deploy(object):
 
     def __init__(self, func,  **kwargs):
         self.ret = func()
+        self.value = None
+
         self.s = Screen(self.ret)
         self.y, self.x = 0, 6
 
@@ -23,17 +26,34 @@ class Deploy(object):
                 if self.y == 0:
                     self.y = self.y + 1
                 else:
-                    self.s.stdscr.addstr(self.y+1, 0, self.s.line_storege[self.y], curses.color_pair(1))
-                    self.s.stdscr.addstr(self.y, 0, self.s.line_storege[self.y-1])
-                    self.y = self.y + 1
+                    try:
+                        self.s.stdscr.addstr(self.y+1, 0, self.s.line_storege[self.y], curses.color_pair(1))
+                        self.s.stdscr.addstr(self.y, 0, self.s.line_storege[self.y-1])
+                        self.y = self.y + 1
+                    except IndexError:
+                        pass
 
             if key == curses.KEY_UP:
-                if self.y == 0:
+                if self.y == 1:
                     pass
                 else:
-                    self.s.stdscr.addstr(self.y-1, 0, self.s.line_storege[self.y-2], curses.color_pair(1))
-                    self.s.stdscr.addstr(self.y, 0, self.s.line_storege[self.y-1])
-                    self.y = self.y-1
+                    try:
+                        self.s.stdscr.addstr(self.y-1, 0, self.s.line_storege[self.y-2], curses.color_pair(1))
+                        self.s.stdscr.addstr(self.y, 0, self.s.line_storege[self.y-1])
+                        self.y = self.y-1
+                    except IndexError:
+                        pass
+
+            if key == ord("a"):
+                self.value = self.s.line_storege[self.y]
+                break
+#                 self._action(self.s.line_storege[self.y])
+
+        print self.value
+        return self._action(self.value)
+
+    def _action(self, line):
+        sys.stdout.write(line)
 
 
 def deploy(*args, **kwargs):
@@ -45,14 +65,3 @@ def deploy(*args, **kwargs):
     #     obj = Deploy(obj)
     #     return obj
     # return inner
-
-
-@deploy
-def main():
-    pass
-    return ["a", "b", "c"]
-
-# main = tes(main)
-
-if __name__ == "__main__":
-    main
