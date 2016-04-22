@@ -3,7 +3,8 @@
 import sys
 import curses
 import locale
-from .screen import Screen
+# from tempra.screen import Screen
+from screen import Screen
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -14,46 +15,42 @@ class Deploy(object):
         self.ret = func()
         self.value = None
 
-        self.s = Screen(self.ret)
-        self.y, self.x = 0, 6
+        with Screen(self.ret) as s:
+            y, x = 1, 6
 
-        while True:
-            key = self.s.stdscr.getch()
-            if key == ord("q"):
-                break
+            while True:
+                key = s.stdscr.getch()
+                if key == ord("q"):
+                    break
 
-            if key == curses.KEY_DOWN:
-                if self.y == 0:
-                    self.y = self.y + 1
-                else:
+                if key == curses.KEY_DOWN:
                     try:
-                        self.s.stdscr.addstr(self.y+1, 0, self.s.line_storege[self.y], curses.color_pair(1))
-                        self.s.stdscr.addstr(self.y, 0, self.s.line_storege[self.y-1])
-                        self.y = self.y + 1
-                    except IndexError:
+                        s.stdscr.addstr(y+1, 0, s.line_storege[y+1], curses.color_pair(1))
+                        s.stdscr.addstr(y, 0, s.line_storege[y])
+                        y = y + 1
+                    except KeyError:
                         pass
 
-            if key == curses.KEY_UP:
-                if self.y == 1:
-                    pass
-                else:
-                    try:
-                        self.s.stdscr.addstr(self.y-1, 0, self.s.line_storege[self.y-2], curses.color_pair(1))
-                        self.s.stdscr.addstr(self.y, 0, self.s.line_storege[self.y-1])
-                        self.y = self.y-1
-                    except IndexError:
+                if key == curses.KEY_UP:
+                    if y == 1:
                         pass
+                    else:
+                        try:
+                            s.stdscr.addstr(y-1, 0, s.line_storege[y-1], curses.color_pair(1))
+                            s.stdscr.addstr(y, 0, s.line_storege[y])
+                            y = y-1
+                        except KeyError:
+                            pass
 
-            if key == ord("a"):
-                self.value = self.s.line_storege[self.y]
-                break
-#                 self._action(self.s.line_storege[self.y])
+                if key == ord("a"):
+                    self.value = s.line_storege[y]
+                    break
 
-        print self.value
-        return self._action(self.value)
+        if self.value:
+            return self._output(self.value)
 
-    def _action(self, line):
-        sys.stdout.write(line)
+    def _output(self, value):
+        sys.stdout.write(value)
 
 
 def deploy(*args, **kwargs):
