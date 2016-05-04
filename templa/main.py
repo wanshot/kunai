@@ -4,9 +4,4 @@ from core import deploy
 
 @deploy
 def main():
-    return ["tempraaaaaaaaaaaaaaaaaaaa!!", "ramen!!", "sushi!!"]
-
-
-# @deploy(default_action="test")
-# def rize():
-#         return ["tempraaaaaaaaaaaaaaaaaaaa!!", "ramen!!", "sushi!!"]
+    return ["tempra!!", "ramen!!", "sushi!!", "menma!!"]
