@@ -3,6 +3,7 @@
 import curses
 
 SP_KEYS = {
-    curses.KEY_DOWN: "key_down",
-    curses.KEY_UP: "key_up",
+    curses.KEY_DOWN: "down",
+    curses.KEY_UP: "up",
+    curses.KEY_BACKSPACE: "backspace",
 }

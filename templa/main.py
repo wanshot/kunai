@@ -4,4 +4,13 @@ from core import deploy
 
 @deploy
 def main():
-    return ["tempra!!", "ramen!!", "sushi!!", "menma!!"]
+    return [
+        "tempra!!",
+        "ramen!!",
+        "sushi!!",
+        "menma!!",
+        "meron!!",
+        "mekabu!!",
+        "karaage",
+        "torikara",
+    ]

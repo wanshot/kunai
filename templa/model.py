@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # from .exceptions import ParseError
 from collections import OrderedDict
+import curses
 import unicodedata
 
 
@@ -12,7 +13,7 @@ class Model(object):
 
         if isinstance(list_, list):
             self.list_ = list_
-            self.lines = self._create_lines()
+            self.orig_lines = self._create_lines()
 
     def _create_lines(self):
         r = OrderedDict()
@@ -28,42 +29,34 @@ class Model(object):
 
         return r
 
-    def update(self, keyword):
-        """Update Model Class
+    def update(self):
+        """Update Model lines
         """
-        if self.keyword:
-            self.keyword += keyword
-        else:
-            self.keyword = keyword
-
         r = OrderedDict()
         lineno = 1
-        for line in self.lines.values():
+        for line in self.orig_lines.values():
             if self.keyword in line:
                 r[lineno] = line
                 lineno += 1
 
         self.lines = r
 
-    def next_line(self, pos_y, pos_x, height, width, color, stdscr):
+    def key_handler(self, pos_y, pos_x, height, width, color, key, stdscr):
+        if key == "up":
+            new_pos_y = pos_y - 1
+        if key == "down":
+            new_pos_y = pos_y + 1
+
         # new line
-        new_pos_y = pos_y + 1
         new_line = self._adapt_line(self.lines[new_pos_y], width)
-        stdscr.addstr(new_pos_y, pos_x, new_line, color)
+        stdscr.addstr(new_pos_y, pos_x, new_line, color | curses.A_UNDERLINE)
         # old line
         old_line = self._adapt_line(self.lines[pos_y], width)
         stdscr.addstr(pos_y, pos_x, old_line)
         return new_pos_y
 
-    def prev_line(self, pos_y, pos_x, height, width, color, stdscr):
-        # new line
-        new_pos_y = pos_y - 1
-        new_line = self._adapt_line(self.lines[new_pos_y], width)
-        stdscr.addstr(new_pos_y, pos_x, new_line, color)
-        # old line
-        old_line = self._adapt_line(self.lines[pos_y], width)
-        stdscr.addstr(pos_y, pos_x, old_line)
-        return new_pos_y
+    def erasechar(self):
+        self.keyword = self.keyword[:-1]
 
     def _adapt_line(self, line, width):
         ea_count = len([u for u in line.decode('utf-8') if unicodedata.east_asian_width(u) in ('F', 'W')])

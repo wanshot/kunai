@@ -11,6 +11,7 @@ import unicodedata
 from manage import LoadConfig
 from model import Model
 from tty import get_ttyname, reconnect_descriptors
+from key import SP_KEYS
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -49,7 +50,7 @@ class Templa(object):
         curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
         curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_CYAN)
 
-#         curses.curs_set(0)
+        curses.curs_set(0)
 
         # Invalidation Ctrl + z
         signal.signal(signal.SIGINT, lambda signum, frame: None)
@@ -82,17 +83,25 @@ class Templa(object):
             try:
                 key = self.stdscr.getch()
 
-                if key == curses.KEY_DOWN:
-                    self.y = self.model.next_line(self.y, self.x, self.height, self.width, curses.color_pair(1), self.stdscr)
-                if key == curses.KEY_UP:
-                    self.y = self.model.prev_line(self.y, self.x, self.height, self.width, curses.color_pair(1), self.stdscr)
+                if SP_KEYS.get(key):
+#                   curses.erasechar()
+                    self.y = self.model.key_handler(self.y,
+                                                    self.x,
+                                                    self.height,
+                                                    self.width,
+                                                    curses.color_pair(1),
+                                                    SP_KEYS[key],
+                                                    self.stdscr)
 
-                # normal key
-                elif 0 < key < 256:
-                    self.model.update(curses.ascii.unctrl(key))
+                else:
+                    if key == 127:
+                        self.model.erasechar()
+                        self.model.update()
+                    else:
+                        self.model.keyword += curses.ascii.unctrl(key)
+                        self.model.update()
 
                     if self.model.keyword:
-
                         with self.global_lock:
 
                             if key == ord("q"):
@@ -119,10 +128,15 @@ class Templa(object):
             self.stdscr.refresh()
 
     def _set_lines(self):
+
+        # init
+        if self.model.lines is None:
+            self.model.lines = self.model.orig_lines
+
         for lineno, line in self.model.lines.items():
             adapt_line = self._adapt_line(line)
             if lineno == 1:
-                self.stdscr.addstr(lineno, 0, adapt_line, curses.color_pair(1))  # set first line color
+                self.stdscr.addstr(lineno, 0, adapt_line, curses.color_pair(1) | curses.A_UNDERLINE)  # set first line color
             else:
                 self.stdscr.addstr(lineno, 0, adapt_line)
         self.stdscr.move(1, 3)
