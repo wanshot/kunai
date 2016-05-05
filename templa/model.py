@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # from .exceptions import ParseError
+import re
 from collections import OrderedDict
 import curses
 import unicodedata
@@ -64,3 +65,12 @@ class Model(object):
         diff_byte = width - (unicode_diff + (ea_count * 2))
         max_line = line + diff_byte * " "
         return max_line[:width]
+
+    def markup(self, line):
+        result = []
+
+        if self.keyword:
+            for x in re.finditer(ur"{}".format(self.keyword), line):
+                result.append((x.start(), x.end()))
+
+        return result

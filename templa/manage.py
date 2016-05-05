@@ -10,9 +10,13 @@ TEMPRA_ROOT_DIRECTORY = os.path.expanduser('~/.tempra/')
 TEMPRA_CONF_PATH = TEMPRA_ROOT_DIRECTORY + 'temprarc'
 
 DEFAULT_CONFIG = """
-[views]
+[prompt]
 # DEFAULT: `> `
-# INPUT_FIELD_LABEL =
+INPUT_FIELD_LABEL =
+[display options]
+BOLD =
+# DEFAULT: True
+UNDER_LINE =True
 """
 
 
@@ -26,19 +30,23 @@ def make_tempra_config_file():
 class LoadConfig(object):
 
     def __init__(self):
-#         self._check_config()
+        self._check_config()
         self._load()
 
-#     def _check_config(self):
-#         if not os.path.exists(TEMPRA_ROOT_DIRECTORY):
-#             raise ConfigLoadError('.tempra directory is not found')
-#         if not os.path.isfile(TEMPRA_CONF_PATH):
-#             raise ConfigLoadError('temprarc is not found')
+    def _check_config(self):
+        if not os.path.exists(TEMPRA_ROOT_DIRECTORY):
+            raise IndexError('.tempra directory is not found')
+        if not os.path.isfile(TEMPRA_CONF_PATH):
+            raise IndexError('temprarc is not found')
 
     def _load(self):
         conf = SafeConfigParser()
         conf.read(TEMPRA_CONF_PATH)
-        self.input_field_label = conf.get('views', 'INPUT_FIELD_LABEL')
+
+        self.input_field_label = conf.get('prompt', 'INPUT_FIELD_LABEL')
+
+        self.bold = conf.get('display options', 'BOLD')
+        self.under_line = conf.get('display options', 'UNDER_LINE')
 
 
 if __name__ == "__main__":

@@ -13,4 +13,8 @@ def main():
         "mekabu!!",
         "karaage",
         "torikara",
+        "ls -a",
+        "python manage runserver",
+        "cd /var/www/wan/log",
+        "cd /var/www/wan/log",
     ]

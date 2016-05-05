@@ -10,6 +10,7 @@ import unicodedata
 
 from manage import LoadConfig
 from model import Model
+from display import Display
 from tty import get_ttyname, reconnect_descriptors
 from key import SP_KEYS
 
@@ -43,14 +44,10 @@ class Templa(object):
 
     def __enter__(self):
         self.stdscr = curses.initscr()
-        curses.start_color()
-
         self.height, self.width = self.stdscr.getmaxyx()
-
-        curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
-        curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_CYAN)
-
         curses.curs_set(0)
+
+        self.display = Display(self.stdscr)
 
         # Invalidation Ctrl + z
         signal.signal(signal.SIGINT, lambda signum, frame: None)
@@ -89,7 +86,7 @@ class Templa(object):
                                                     self.x,
                                                     self.height,
                                                     self.width,
-                                                    curses.color_pair(1),
+                                                    self.display.select,
                                                     SP_KEYS[key],
                                                     self.stdscr)
 
@@ -136,9 +133,13 @@ class Templa(object):
         for lineno, line in self.model.lines.items():
             adapt_line = self._adapt_line(line)
             if lineno == 1:
-                self.stdscr.addstr(lineno, 0, adapt_line, curses.color_pair(1) | curses.A_UNDERLINE)  # set first line color
+                self.stdscr.addstr(lineno, 0, adapt_line, self.display.select)  # set first line color
             else:
-                self.stdscr.addstr(lineno, 0, adapt_line)
+                self.stdscr.addstr(lineno, 0, adapt_line, self.display.normal)
+                # markup
+                if self.model.keyword:
+                    for start, end in self.model.markup(line):
+                        self.stdscr.chgat(lineno, start, end, curses.color_pair(3))
         self.stdscr.move(1, 3)
 
     def _set_prompt(self):
@@ -155,6 +156,9 @@ class Templa(object):
         diff_byte = self.width - (unicode_diff + (ea_count * 2))
         max_line = line + diff_byte * " "
         return max_line[:self.width]
+
+    def addstr(self, pos_y, pos_x, line, **color):
+        self.stdscr
 
 
 class Core(object):
