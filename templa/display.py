@@ -30,49 +30,58 @@ ATTRS = {
 
 class Display(object):
 
-    def __init__(self, stdscr, fg=None, bg=None, markup=None, select=None):
+    def __init__(self, stdscr):
 
         self.config = LoadConfig()
 
-        self.fg_color = curses.COLOR_WHITE
-        if fg is not None:
-            self.fg_color = COLORS[fg]
-        self.bg_color = curses.COLOR_BLACK
-        if bg is not None:
-            self.bg_color = COLORS[bg]
-        self.markup_color = curses.COLOR_YELLOW
-        if markup is not None:
-            self.markup_color = COLORS[markup]
-        self.select_color = curses.COLOR_BLUE
-        if select is not None:
-            self.select_color = COLORS[select]
-
         self.stdscr = stdscr
         curses.start_color()
+        self._set_color()
+
+    def _set_color(self):
 
         # normal line
-        curses.init_pair(1, self.fg_color, self.bg_color)
+        fg = self.config.normal_line_color.get('fg', 'white')
+        bg = self.config.normal_line_color.get('bg', 'black')
+        normal_line_fg = COLORS.get(fg, curses.COLOR_WHITE)
+        normal_line_bg = COLORS.get(bg, curses.COLOR_BLACK)
+        curses.init_pair(1, normal_line_fg, normal_line_bg)
+
         # select line
-        curses.init_pair(2, self.fg_color, self.select_color)
-        # markup select line
-        curses.init_pair(3, self.markup_color, self.select_color)
-        # markup normal line
-        curses.init_pair(4, self.markup_color, self.bg_color)
+        fg = self.config.select_line_color.get('fg', 'white')
+        bg = self.config.select_line_color.get('bg', 'blue')
+        select_line_fg = COLORS.get(fg, curses.COLOR_WHITE)
+        select_line_bg = COLORS.get(bg, curses.COLOR_BLUE)
+        curses.init_pair(2, select_line_fg, select_line_bg)
+
+        # markup
+        markup = self.config.markup_color.get('color')
+        markup_color = COLORS.get(markup, curses.COLOR_YELLOW)
+        # normal line markup
+        curses.init_pair(3, markup_color, normal_line_bg)
+        # select line markup
+        curses.init_pair(4, markup_color, select_line_bg)
 
     @property
     def normal(self):
-        return curses.color_pair(1)
+        result = curses.color_pair(1)
+        for key, value in self.config.normal_line_options.items():
+            if value == 'True':
+                result = or_(result, ATTRS.get(key))
+        return result
 
     @property
     def select(self):
-        if not self.config.under_line:
-            pass
-        return or_(curses.color_pair(2), curses.A_UNDERLINE)
-
-    @property
-    def markup_select(self):
-        return curses.color_pair(3) | curses.A_UNDERLINE
+        result = curses.color_pair(2)
+        for key, value in self.config.select_line_options.items():
+            if value == 'True':
+                result = or_(result, ATTRS.get(key))
+        return result
 
     @property
     def markup_normal(self):
+        return curses.color_pair(3)
+
+    @property
+    def markup_select(self):
         return curses.color_pair(4)
