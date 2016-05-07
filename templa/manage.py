@@ -31,7 +31,7 @@ FG = white
 BG = blue
 
 [markup color]
-color = yellow
+COLOR = yellow
 
 """
 

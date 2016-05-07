@@ -17,4 +17,8 @@ def main():
         "python manage runserver",
         "cd /var/www/wan/log",
         "cd /var/www/wan/log",
+        "cd /var/www/wan/log",
+        "cd /var/www/wan/log",
+        "cd /var/www/wan/log",
+
     ]

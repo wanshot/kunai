@@ -6,7 +6,6 @@ import locale
 import signal
 import threading
 import curses.ascii
-import unicodedata
 
 from manage import LoadConfig
 from model import Model
@@ -29,7 +28,7 @@ class Templa(object):
 
     def __init__(self, ret, f):
         self.global_lock = threading.Lock()
-        self.model = Model(ret)
+        self.ret = ret
         self.conf = LoadConfig()
         self.y, self.x = 1, 0
 
@@ -48,6 +47,8 @@ class Templa(object):
         curses.curs_set(0)
 
         self.display = Display(self.stdscr)
+        self.model = Model(self.ret, self.height, self.width)
+        self.page = None
 
         # Invalidation Ctrl + z
         signal.signal(signal.SIGINT, lambda signum, frame: None)
@@ -84,8 +85,7 @@ class Templa(object):
 #                   curses.erasechar()
                     self.y = self.model.key_handler(self.y,
                                                     self.x,
-                                                    self.height,
-                                                    self.width,
+                                                    self.page,
                                                     self.display.select,
                                                     SP_KEYS[key],
                                                     self.stdscr)
@@ -125,17 +125,12 @@ class Templa(object):
             self.stdscr.refresh()
 
     def _set_lines(self):
-
-        # init
-        if self.model.lines is None:
-            self.model.lines = self.model.orig_lines
-
-        for lineno, line in self.model.lines.items():
-            adapt_line = self._adapt_line(line)
-            if lineno == 1:
-                self.stdscr.addstr(lineno, 0, adapt_line, self.display.select)  # set first line color
+        _, self.page = self.model.pager.next()
+        for lineno, line in self.page.items():
+            if lineno == 1:  # set first line color
+                self.stdscr.addstr(lineno, 0, line, self.display.select)
             else:
-                self.stdscr.addstr(lineno, 0, adapt_line, self.display.normal)
+                self.stdscr.addstr(lineno, 0, line, self.display.normal)
                 # markup
                 if self.model.keyword:
                     for start, end in self.model.markup(line):
@@ -150,15 +145,10 @@ class Templa(object):
 
         self.stdscr.addstr(0, 0, '{} {}'.format(label, self.model.keyword))
 
-    def _adapt_line(self, line):
-        ea_count = len([u for u in line.decode('utf-8') if unicodedata.east_asian_width(u) in ('F', 'W')])
-        unicode_diff = len(line.decode('utf-8')) - ea_count
-        diff_byte = self.width - (unicode_diff + (ea_count * 2))
-        max_line = line + diff_byte * " "
-        return max_line[:self.width]
-
-    def addstr(self, pos_y, pos_x, line, **color):
-        self.stdscr
+#     def addstr(self, pos_y, pos_x=0, witdth, height, line, display):
+        # 別のクラスに実装する
+        # 他のラップする関数もまとめる
+#         adapt_line = _adapt_line(line)[:self.width]
 
 
 class Core(object):

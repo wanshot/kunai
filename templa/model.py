@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # from .exceptions import ParseError
 import re
+from itertools import cycle
 from collections import OrderedDict
 import curses
 import unicodedata
@@ -8,63 +9,66 @@ import unicodedata
 
 class Model(object):
 
-    def __init__(self, list_):
-        self.lines = None
+    def __init__(self, list_, height, width):
+        self.list_ = list_
+        self.height = height
+        self.width = width
+
         self.keyword = u''
+        self.pager = self._create_pager()
 
-        if isinstance(list_, list):
-            self.list_ = list_
-            self.orig_lines = self._create_lines()
+    def _create_pager(self, new_list=None):
+        """
+        >>> model = self.Model(["hoge", "huga", "piyo"], 2)
+        >>> model.pager.next()
+        (1, OrderedDict([(1, 'hoge'), (2, 'huga')]))
+        >>> model.pager.next()
+        (2, OrderedDict([(1, 'piyo')]))
+        >>> model.pager.next()
+        (1, OrderedDict([(1, 'hoge'), (2, 'huga')]))
+        """
+        r = self.list_
+        if new_list:
+            r = new_list
 
-    def _create_lines(self):
-        r = OrderedDict()
-        for lineno, line in enumerate(self.list_, start=1):
-            if isinstance(line, str):
-                line = line.decode('utf-8')
-            elif isinstance(line, unicode):
-                pass
-            else:
-                raise TypeError("Required argument hoge not str or unicode")
+        pages = OrderedDict()
+        for page_num, c in enumerate(range(0, len(r), self.height-1), start=1):
+            od = OrderedDict()
+            for lineno, line in enumerate(r[c:c + self.height-1], start=1):
+                od[lineno] = self._adapt(line)
+            pages[page_num] = od
 
-            r[lineno] = line
-
-        return r
+        return cycle(pages.items())
 
     def update(self):
-        """Update Model lines
+        """Update Model Pager
         """
-        r = OrderedDict()
-        lineno = 1
-        for line in self.orig_lines.values():
-            if self.keyword in line:
-                r[lineno] = line
-                lineno += 1
+        updated = [x for x in self.list_ if self.keyword in x]
+        self.pager = self._create_pager(updated)
 
-        self.lines = r
-
-    def key_handler(self, pos_y, pos_x, height, width, color, key, stdscr):
+    def key_handler(self, pos_y, pos_x, page, color, key, stdscr):
         if key == "up":
             new_pos_y = pos_y - 1
         if key == "down":
             new_pos_y = pos_y + 1
 
         # new line
-        new_line = self._adapt_line(self.lines[new_pos_y], width)
+        new_line = page[new_pos_y]
         stdscr.addstr(new_pos_y, pos_x, new_line, color | curses.A_UNDERLINE)
         # old line
-        old_line = self._adapt_line(self.lines[pos_y], width)
+        old_line = page[pos_y]
         stdscr.addstr(pos_y, pos_x, old_line)
         return new_pos_y
 
     def erasechar(self):
         self.keyword = self.keyword[:-1]
 
-    def _adapt_line(self, line, width):
+    def _adapt(self, line):
         ea_count = len([u for u in line.decode('utf-8') if unicodedata.east_asian_width(u) in ('F', 'W')])
         unicode_diff = len(line.decode('utf-8')) - ea_count
-        diff_byte = width - (unicode_diff + (ea_count * 2))
+        diff_byte = self.width - (unicode_diff + (ea_count * 2))
         max_line = line + diff_byte * " "
-        return max_line[:width]
+        return max_line[:self.width]
 
     def markup(self, line):
         result = []
