@@ -3,7 +3,6 @@
 import re
 from itertools import cycle
 from collections import OrderedDict
-import curses
 import unicodedata
 
 
@@ -28,7 +27,7 @@ class Model(object):
         (1, OrderedDict([(1, 'hoge'), (2, 'huga')]))
         """
         r = self.list_
-        if new_list:
+        if isinstance(new_list, list):
             r = new_list
 
         pages = OrderedDict()
@@ -45,23 +44,6 @@ class Model(object):
         """
         updated = [x for x in self.list_ if self.keyword in x]
         self.pager = self._create_pager(updated)
-
-    def key_handler(self, pos_y, pos_x, page, color, key, stdscr):
-        if key == "up":
-            new_pos_y = pos_y - 1
-        if key == "down":
-            new_pos_y = pos_y + 1
-
-        # new line
-        new_line = page[new_pos_y]
-        stdscr.addstr(new_pos_y, pos_x, new_line, color | curses.A_UNDERLINE)
-        # old line
-        old_line = page[pos_y]
-        stdscr.addstr(pos_y, pos_x, old_line)
-        return new_pos_y
-
-    def erasechar(self):
-        self.keyword = self.keyword[:-1]
 
     def _adapt(self, line):
         ea_count = len([u for u in line.decode('utf-8') if unicodedata.east_asian_width(u) in ('F', 'W')])

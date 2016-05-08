@@ -10,8 +10,8 @@ import curses.ascii
 from manage import LoadConfig
 from model import Model
 from display import Display
+from key import KeyHandler
 from tty import get_ttyname, reconnect_descriptors
-from key import SP_KEYS
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -31,6 +31,8 @@ class Templa(object):
         self.ret = ret
         self.conf = LoadConfig()
         self.y, self.x = 1, 0
+        self.page = None
+        self.page_number = None
 
         if f is None:
             self.stdin = sys.stdin
@@ -48,7 +50,6 @@ class Templa(object):
 
         self.display = Display(self.stdscr)
         self.model = Model(self.ret, self.height, self.width)
-        self.page = None
 
         # Invalidation Ctrl + z
         signal.signal(signal.SIGINT, lambda signum, frame: None)
@@ -80,23 +81,13 @@ class Templa(object):
         while True:
             try:
                 key = self.stdscr.getch()
-
-                if SP_KEYS.get(key):
-#                   curses.erasechar()
-                    self.y = self.model.key_handler(self.y,
-                                                    self.x,
-                                                    self.page,
-                                                    self.display.select,
-                                                    SP_KEYS[key],
-                                                    self.stdscr)
-
+                keyhandler = KeyHandler(self.stdscr, self.model, self.y, self.x,
+                                        self.page, self.page_number, self.display, key)
+                if keyhandler.new_pos_y:
+                    self.y = keyhandler.new_pos_y
                 else:
-                    if key == 127:
-                        self.model.erasechar()
-                        self.model.update()
-                    else:
-                        self.model.keyword += curses.ascii.unctrl(key)
-                        self.model.update()
+                    self.model = keyhandler.model
+                    self.model.update()
 
                     if self.model.keyword:
                         with self.global_lock:
@@ -125,17 +116,23 @@ class Templa(object):
             self.stdscr.refresh()
 
     def _set_lines(self):
-        _, self.page = self.model.pager.next()
-        for lineno, line in self.page.items():
-            if lineno == 1:  # set first line color
-                self.stdscr.addstr(lineno, 0, line, self.display.select)
-            else:
-                self.stdscr.addstr(lineno, 0, line, self.display.normal)
-                # markup
-                if self.model.keyword:
-                    for start, end in self.model.markup(line):
-                        self.stdscr.chgat(lineno, start, end, curses.color_pair(3))
-        self.stdscr.move(1, 3)
+        try:
+            self.page_number, self.page = self.model.pager.next()
+            for lineno, line in self.page.items():
+                if lineno == 1:  # set first line color
+                    self.stdscr.addstr(lineno, 0, line, self.display.select)
+                else:
+                    self.stdscr.addstr(lineno, 0, line, self.display.normal)
+                    # markup
+                    if self.model.keyword:
+                        for start, end in self.model.markup(line):
+                            self.stdscr.chgat(lineno, start, end, curses.color_pair(3))
+        except StopIteration:
+            # Do not display
+            self.page = None
+            self.page_number = None
+        finally:
+            self.stdscr.move(1, 1)
 
     def _set_prompt(self):
         # default prompt label
@@ -165,7 +162,7 @@ class Core(object):
             sys.exit(value)
 
 
-def deploy(*args, **kwargs):
+def fry(*args, **kwargs):
 
     if len(args) == 1 and callable(args[0]):
         return Core(args[0], **kwargs)

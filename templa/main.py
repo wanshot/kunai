@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
-from core import deploy
+from core import fry
 
 
-@deploy
+@fry
 def main():
     return [
         "tempra!!",
