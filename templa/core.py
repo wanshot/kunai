@@ -31,8 +31,6 @@ class Templa(object):
         self.ret = ret
         self.conf = LoadConfig()
         self.y, self.x = 1, 0
-        self.page = None
-        self.page_number = None
 
         if f is None:
             self.stdin = sys.stdin
@@ -46,10 +44,10 @@ class Templa(object):
     def __enter__(self):
         self.stdscr = curses.initscr()
         self.height, self.width = self.stdscr.getmaxyx()
-        curses.curs_set(0)
+#         curses.curs_set(0)
 
         self.display = Display(self.stdscr)
-        self.model = Model(self.ret, self.height, self.width)
+        self.model = Model(self.ret, self.stdscr, self.height, self.width)
 
         # Invalidation Ctrl + z
         signal.signal(signal.SIGINT, lambda signum, frame: None)
@@ -76,13 +74,13 @@ class Templa(object):
 
         def re_despiction():
             self._set_prompt()
-            self._set_lines()
+            set_lines(self.stdscr, self.model, self.display)
 
         while True:
             try:
                 key = self.stdscr.getch()
-                keyhandler = KeyHandler(self.stdscr, self.model, self.y, self.x,
-                                        self.page, self.page_number, self.display, key)
+                keyhandler = KeyHandler(self.stdscr, self.model, self.y, self.x, self.display, key)
+                self.model = keyhandler.model
                 if keyhandler.new_pos_y:
                     self.y = keyhandler.new_pos_y
                 else:
@@ -112,27 +110,8 @@ class Templa(object):
             self.y, self.x = 1, 0
             self.stdscr.erase()
             self._set_prompt()
-            self._set_lines()
+            set_lines(self.stdscr, self.model, self.display)
             self.stdscr.refresh()
-
-    def _set_lines(self):
-        try:
-            self.page_number, self.page = self.model.pager.next()
-            for lineno, line in self.page.items():
-                if lineno == 1:  # set first line color
-                    self.stdscr.addstr(lineno, 0, line, self.display.select)
-                else:
-                    self.stdscr.addstr(lineno, 0, line, self.display.normal)
-                    # markup
-                    if self.model.keyword:
-                        for start, end in self.model.markup(line):
-                            self.stdscr.chgat(lineno, start, end, curses.color_pair(3))
-        except StopIteration:
-            # Do not display
-            self.page = None
-            self.page_number = None
-        finally:
-            self.stdscr.move(1, 1)
 
     def _set_prompt(self):
         # default prompt label
@@ -142,10 +121,20 @@ class Templa(object):
 
         self.stdscr.addstr(0, 0, '{} {}'.format(label, self.model.keyword))
 
-#     def addstr(self, pos_y, pos_x=0, witdth, height, line, display):
-        # 別のクラスに実装する
-        # 他のラップする関数もまとめる
-#         adapt_line = _adapt_line(line)[:self.width]
+
+def set_lines(stdscr, model, display):
+#     try:
+    for lineno, line in model.current_page.items():
+        if line is None:
+            stdscr.move(lineno, 0)
+            stdscr.clrtoeol()
+        else:
+            if lineno == 1:  # set first line color
+                stdscr.addstr(lineno, 0, line, display.select)
+            else:
+                stdscr.addstr(lineno, 0, line[:model.width-1], display.normal)
+#     except curses.error:
+#         pass
 
 
 class Core(object):

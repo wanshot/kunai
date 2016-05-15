@@ -10,57 +10,69 @@ SP_KEYS = {
 }
 
 
+def set_lines(stdscr, model, display):
+    for lineno, line in model.current_page.items():
+        if line is None:
+            stdscr.move(lineno, 0)
+            stdscr.clrtoeol()
+        else:
+            if lineno == 1:  # set first line color
+                stdscr.addstr(lineno, 0, line, display.select)
+            else:
+                stdscr.addstr(lineno, 0, line, display.normal)
+
+
 class KeyHandler(object):
 
-    def __init__(self, stdscr, model,  pos_y, pos_x, page, page_num, color, key):
+    def __init__(self, stdscr, model,  pos_y, pos_x, color, key):
         self.stdscr = stdscr
         self.model = model
         self.pos_y = pos_y
         self.pos_x = pos_x
-        self.page = page
-        self.page_num = page_num
         self.color = color
         self.key = SP_KEYS.get(key)
 
         self.new_pos_y = None
         try:
-            getattr(self, '{}'.format(self.key))()
+            getattr(self, 'key_{}'.format(self.key))()
         except:
             self.update_keyword(key)
 
-    def up(self):
+    def key_up(self):
         self.new_pos_y = self.pos_y - 1
+        # prev page render
+        if self.new_pos_y == 0:
+            self.model.prev_page()
+            self.new_pos_y = self.model.height - 1
+            set_lines(self.stdscr, self.model, self.color)
+        # call last page
+        elif self.model.page_number == 1:
+            if 0 < self.new_pos_y:
+                self.model.last_page_number()
+                self.new_pos_y = len(self.model.page.keys())
+                set_lines(self.stdscr, self.model, self.color)
+        # move select
+        self.stdscr.chgat(self.new_pos_y, self.pos_x, -1, self.color.select)  # new line
+        self.stdscr.chgat(self.pos_y, self.pos_x, -1, self.color.normal)      # old line
 
-#         try:
-        # new line
-        new_line = self.page[self.new_pos_y]
-        self.stdscr.addstr(self.new_pos_y, self.pos_x, new_line, self.color.select)
-        # old line
-        old_line = self.page[self.pos_y]
-        self.stdscr.addstr(self.pos_y, self.pos_x, old_line, self.color.normal)
-#         except KeyError:
-#             self.pager.next()
-            # update処理
-#         except TypeError:
-#             pass
-
-    def down(self):
+    def key_down(self):
         self.new_pos_y = self.pos_y + 1
+        # next page render
+        if self.model.height - 1 < self.new_pos_y:
+            self.model.next_page()
+            self.new_pos_y = 1
+            set_lines(self.stdscr, self.model, self.color)
+        # call first page
+        elif None in self.model.current_page.values():
+            if self.model.current_page.values().index(None) < self.new_pos_y:
+                self.model.first_page_number()
+                self.new_pos_y = 1
+                set_lines(self.stdscr, self.model, self.color)
+        # move select
+        self.stdscr.chgat(self.new_pos_y, self.pos_x, -1, self.color.select)  # new line
+        self.stdscr.chgat(self.pos_y, self.pos_x, -1, self.color.normal)      # old line
 
-#         try:
-        # new line
-        new_line = self.page[self.new_pos_y]
-        self.stdscr.addstr(self.new_pos_y, self.pos_x, new_line, self.color.select)
-        # old line
-        old_line = self.page[self.pos_y]
-        self.stdscr.addstr(self.pos_y, self.pos_x, old_line, self.color.normal)
-#         except KeyError:
-#             self.pager.next()
-            # update処理
-#         except TypeError:
-#             pass
-
-    def backspace(self):
+    def key_backspace(self):
         if self.model.keyword:
             self.model.keyword = self.model.keyword[:-1]
 
