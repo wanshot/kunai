@@ -10,16 +10,29 @@ SP_KEYS = {
 }
 
 
-def set_lines(stdscr, model, display):
+def update_prompt(stdscr, model):
+    # default prompt label
+    label = '%'
+#     if self.conf.input_field_label:
+#         label = self.conf.input_field_label
+
+    stdscr.addstr(0, 0, '{} {}{}'.format(label,
+                                         model.adapted_keyword(),
+                                         model.page_info))
+
+
+def update_lines(stdscr, model, display, select_num=1):
+    # Todo:: move core.py
     for lineno, line in model.current_page.items():
+        # overwrite line
         if line is None:
             stdscr.move(lineno, 0)
             stdscr.clrtoeol()
         else:
-            if lineno == 1:  # set first line color
+            if lineno == select_num:  # set first select line color
                 stdscr.addstr(lineno, 0, line, display.select)
             else:
-                stdscr.addstr(lineno, 0, line, display.normal)
+                stdscr.addstr(lineno, 0, line[:model.width-1], display.normal)
 
 
 class KeyHandler(object):
@@ -40,34 +53,45 @@ class KeyHandler(object):
 
     def key_up(self):
         self.new_pos_y = self.pos_y - 1
-        # prev page render
         if self.new_pos_y == 0:
-            self.model.prev_page()
-            self.new_pos_y = self.model.height - 1
-            set_lines(self.stdscr, self.model, self.color)
-        # call last page
-        elif self.model.page_number == 1:
-            if 0 < self.new_pos_y:
-                self.model.last_page_number()
-                self.new_pos_y = len(self.model.page.keys())
-                set_lines(self.stdscr, self.model, self.color)
+
+            # call last page
+            if self.model.page_number == 1:
+                self.model.move_last_page()
+                bottom_num = max([idx for idx, x in enumerate(self.model.current_page.values(), start=1) if x])
+                self.new_pos_y = bottom_num
+                update_lines(self.stdscr, self.model, self.color, bottom_num)
+                update_prompt(self.stdscr, self.model)
+
+            # prev page render
+            else:
+                self.model.move_prev_page()
+                self.new_pos_y = self.model.height-1
+                update_lines(self.stdscr, self.model, self.color)
+                update_prompt(self.stdscr, self.model)
+
         # move select
         self.stdscr.chgat(self.new_pos_y, self.pos_x, -1, self.color.select)  # new line
         self.stdscr.chgat(self.pos_y, self.pos_x, -1, self.color.normal)      # old line
 
     def key_down(self):
         self.new_pos_y = self.pos_y + 1
-        # next page render
-        if self.model.height - 1 < self.new_pos_y:
-            self.model.next_page()
-            self.new_pos_y = 1
-            set_lines(self.stdscr, self.model, self.color)
+
         # call first page
-        elif None in self.model.current_page.values():
+        if None in self.model.current_page.values():
             if self.model.current_page.values().index(None) < self.new_pos_y:
-                self.model.first_page_number()
+                self.model.move_first_page()
                 self.new_pos_y = 1
-                set_lines(self.stdscr, self.model, self.color)
+                update_lines(self.stdscr, self.model, self.color)
+                update_prompt(self.stdscr, self.model)
+
+        # next page render
+        elif self.model.height - 1 < self.new_pos_y:
+            self.model.move_next_page()
+            self.new_pos_y = 1
+            update_lines(self.stdscr, self.model, self.color)
+            update_prompt(self.stdscr, self.model)
+
         # move select
         self.stdscr.chgat(self.new_pos_y, self.pos_x, -1, self.color.select)  # new line
         self.stdscr.chgat(self.pos_y, self.pos_x, -1, self.color.normal)      # old line

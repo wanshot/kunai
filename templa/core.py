@@ -10,7 +10,7 @@ import curses.ascii
 from manage import LoadConfig
 from model import Model
 from display import Display
-from key import KeyHandler
+from key import KeyHandler, update_lines, update_prompt
 from tty import get_ttyname, reconnect_descriptors
 
 locale.setlocale(locale.LC_ALL, '')
@@ -44,7 +44,7 @@ class Templa(object):
     def __enter__(self):
         self.stdscr = curses.initscr()
         self.height, self.width = self.stdscr.getmaxyx()
-#         curses.curs_set(0)
+        curses.curs_set(0)
 
         self.display = Display(self.stdscr)
         self.model = Model(self.ret, self.stdscr, self.height, self.width)
@@ -73,8 +73,8 @@ class Templa(object):
         self.updating_timer = None
 
         def re_despiction():
-            self._set_prompt()
-            set_lines(self.stdscr, self.model, self.display)
+            update_prompt(self.stdscr, self.model)
+            update_lines(self.stdscr, self.model, self.display)
 
         while True:
             try:
@@ -109,32 +109,9 @@ class Templa(object):
         with self.global_lock:
             self.y, self.x = 1, 0
             self.stdscr.erase()
-            self._set_prompt()
-            set_lines(self.stdscr, self.model, self.display)
+            update_prompt(self.stdscr, self.model)
+            update_lines(self.stdscr, self.model, self.display)
             self.stdscr.refresh()
-
-    def _set_prompt(self):
-        # default prompt label
-        label = '%'
-        if self.conf.input_field_label:
-            label = self.conf.input_field_label
-
-        self.stdscr.addstr(0, 0, '{} {}'.format(label, self.model.keyword))
-
-
-def set_lines(stdscr, model, display):
-#     try:
-    for lineno, line in model.current_page.items():
-        if line is None:
-            stdscr.move(lineno, 0)
-            stdscr.clrtoeol()
-        else:
-            if lineno == 1:  # set first line color
-                stdscr.addstr(lineno, 0, line, display.select)
-            else:
-                stdscr.addstr(lineno, 0, line[:model.width-1], display.normal)
-#     except curses.error:
-#         pass
 
 
 class Core(object):
