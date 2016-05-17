@@ -11,6 +11,7 @@ SP_KEYS = {
 
 
 def update_prompt(stdscr, model):
+    # Todo:: move core.py
     # default prompt label
     label = '%'
 #     if self.conf.input_field_label:
@@ -31,8 +32,37 @@ def update_lines(stdscr, model, display, select_num=1):
         else:
             if lineno == select_num:  # set first select line color
                 stdscr.addstr(lineno, 0, line, display.select)
+#                 for begin, end in get_markup_position(line, model.keyword):
+#                     stdscr.chgat(lineno, begin, end, display.markup_select)
             else:
                 stdscr.addstr(lineno, 0, line[:model.width-1], display.normal)
+#                 for begin, end in get_markup_position(line, model.keyword):
+#                     stdscr.chgat(lineno, begin, end, display.markup_normal)
+
+
+def get_markup_position(line, keyword):
+    start = []
+    line = list(line)
+
+    for idx, s in enumerate(line):
+        if keyword.startswith(s):
+            start.append(idx)
+
+    ret = []
+    for i in start:
+        flg = True
+        c = 1
+        while flg:
+            try:
+                if line[i+c] == keyword[i+c]:
+                    c += 1
+                else:
+                    ret.append((i, i+c))
+                    flg = False
+            except:
+                ret.append((i, i+c))
+                flg = False
+    return ret
 
 
 class KeyHandler(object):
@@ -58,9 +88,8 @@ class KeyHandler(object):
             # call last page
             if self.model.page_number == 1:
                 self.model.move_last_page()
-                bottom_num = max([idx for idx, x in enumerate(self.model.current_page.values(), start=1) if x])
-                self.new_pos_y = bottom_num
-                update_lines(self.stdscr, self.model, self.color, bottom_num)
+                self.new_pos_y = self.model.bottom_line_number
+                update_lines(self.stdscr, self.model, self.color, self.model.bottom_line_number)
                 update_prompt(self.stdscr, self.model)
 
             # prev page render
@@ -101,4 +130,7 @@ class KeyHandler(object):
             self.model.keyword = self.model.keyword[:-1]
 
     def update_keyword(self, key):
-        self.model.keyword += curses.ascii.unctrl(key)
+        """stub function
+        # Todo: use tty read character
+        """
+        self.model.keyword += curses.ascii.unctrl(key).decode("utf-8")
