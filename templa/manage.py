@@ -10,6 +10,9 @@ TEMPRA_ROOT_DIRECTORY = os.path.expanduser('~/.tempra/')
 TEMPRA_CONF_PATH = TEMPRA_ROOT_DIRECTORY + 'temprarc'
 
 DEFAULT_CONFIG = """
+[base]
+TEMPLA_FILE_NAME = templa.py
+
 [prompt]
 # DEFAULT: `> `
 INPUT_FIELD_LABEL =
