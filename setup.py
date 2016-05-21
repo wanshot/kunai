@@ -7,7 +7,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name="tempra",
+    name="templa",
     version="0.0.0",
     author="wanshot",
     author_email="",
@@ -18,10 +18,10 @@ setup(
     classifiers=[
         "License :: OSI Approved :: MIT License",
     ],
-    packages=['tempra'],
+    packages=['templa'],
     entry_points={
-        'console_scripts': ['tempra = tempra.main:main']
+        'console_scripts': ['templa = templa.runner:main']
     },
-#     install_requires=["argparse", "six"],
+    install_requires=["argparse", "six"],
 #     test_suite="tests",
 )

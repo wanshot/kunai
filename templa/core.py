@@ -26,7 +26,7 @@ class TerminateLoop(Exception):
 
 class Templa(object):
 
-    def __init__(self, ret, f):
+    def __init__(self, ret, f=None):
         self.global_lock = threading.Lock()
         self.ret = ret
         self.conf = LoadConfig()

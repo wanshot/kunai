@@ -5,12 +5,5 @@ __license__ = 'MIT License',
 __author__ = 'wanshot'
 __author_email__ = 'nishikawa0228@sj9.so-net.ne.jp'
 
+
 from .core import fry
-# from .main import Command
-
-
-def run():
-
-    
-    
-    return u""

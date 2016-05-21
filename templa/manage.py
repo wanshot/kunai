@@ -11,7 +11,7 @@ TEMPRA_CONF_PATH = TEMPRA_ROOT_DIRECTORY + 'temprarc'
 
 DEFAULT_CONFIG = """
 [base]
-TEMPLA_FILE_NAME = templa.py
+TEMPLA_FILE_PATH = "/Users/wan/templa.py"
 
 [prompt]
 # DEFAULT: `> `
@@ -62,6 +62,7 @@ class LoadConfig(object):
         conf = SafeConfigParser()
         conf.read(TEMPRA_CONF_PATH)
 
+        self.templa_file_path = conf.get('base', 'TEMPLA_FILE_PATH')
         self.input_field_label = conf.get('prompt', 'INPUT_FIELD_LABEL')
 
         self.normal_line_color = conf._sections['normal line color']
