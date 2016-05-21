@@ -12,6 +12,7 @@ from model import Model
 from display import Display
 from key import KeyHandler, update_lines, update_prompt
 from tty import get_ttyname, reconnect_descriptors
+from templa import __logo__
 
 locale.setlocale(locale.LC_ALL, '')
 

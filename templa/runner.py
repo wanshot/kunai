@@ -1,27 +1,19 @@
 # -*- coding: utf-8 -*-
 import ast
 import argparse
+import textwrap
 from manage import LoadConfig
 
-TEMPLA_LOGO = """
- _________    _______       _____ ______       ________    ___           ________
-|\___   ___\ |\  ___ \     |\   _ \  _   \    |\   __  \  |\  \         |\   __  \
-\|___ \  \_| \ \   __/|    \ \  \\\__\ \  \   \ \  \|\  \ \ \  \        \ \  \|\  \
-     \ \  \   \ \  \_|/__   \ \  \\|__| \  \   \ \   ____\ \ \  \        \ \   __  \
-      \ \  \   \ \  \_|\ \   \ \  \    \ \  \   \ \  \___|  \ \  \____    \ \  \ \  \
-       \ \__\   \ \_______\   \ \__\    \ \__\   \ \__\      \ \_______\   \ \__\ \__\
-        \|__|    \|_______|    \|__|     \|__|    \|__|       \|_______|    \|__|\|__|
-"""
+LOGAPPNAME = "Interactive Shell Interface"
 
 
 class TemplaRunner(object):
 
     def __init__(self, func_name):
-        self.fucn_name = func_name
         self.conf = LoadConfig()
-        self.code_obj = self._pick_function()
+        self.code_obj = self._pick_function(func_name)
 
-    def _pick_function(self):
+    def _pick_function(self, func_name):
 
         file_name = self.conf.templa_file_path
         with open(file_name, "r") as f:
@@ -30,7 +22,7 @@ class TemplaRunner(object):
         class _Transform(ast.NodeTransformer):
 
             def visit_FunctionDef(self, node):
-                if node.name == self.func_name:
+                if node.name == func_name:
                     return node
 
         exprs = ast.parse(code, self.conf.templa_file_path)
@@ -42,8 +34,20 @@ class TemplaRunner(object):
 
 
 def get_argparser():
-    parser = argparse.ArgumentParser(description=TEMPLA_LOGO)
-    parser.add_argument('function_name', type=str, help='Function Name')
+    from templa import __version__, __logo__
+
+    parser = argparse.ArgumentParser(
+        usage='templa <function name>',
+        description=textwrap.dedent(
+            "{description}{logo}".format(description=LOGAPPNAME, logo=__logo__)),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    parser.add_argument('--version',
+                        action='version',
+                        version='{version}'.format(version=__version__))
+
+    parser.add_argument('function_name', type=str)
     return parser
 
 
