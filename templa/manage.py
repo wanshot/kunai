@@ -11,7 +11,7 @@ TEMPRA_CONF_PATH = TEMPRA_ROOT_DIRECTORY + 'temprarc'
 
 DEFAULT_CONFIG = """
 [base]
-TEMPLA_FILE_PATH = "/Users/wan/templa.py"
+TEMPLA_FILE_PATH =
 
 [prompt]
 # DEFAULT: `> `

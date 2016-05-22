@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import curses
+from search import search_keyword
 
 SP_KEYS = {
     curses.KEY_DOWN: "down",
@@ -32,37 +33,13 @@ def update_lines(stdscr, model, display, select_num=1):
         else:
             if lineno == select_num:  # set first select line color
                 stdscr.addstr(lineno, 0, line, display.select)
-#                 for begin, end in get_markup_position(line, model.keyword):
-#                     stdscr.chgat(lineno, begin, end, display.markup_select)
+                stdscr.addstr(0, 15, model.keyword, display.select)
+                begin, end = search_keyword(line, model.keyword)
+                stdscr.chgat(lineno, begin, end, display.markup_select)
             else:
                 stdscr.addstr(lineno, 0, line[:model.width-1], display.normal)
-#                 for begin, end in get_markup_position(line, model.keyword):
-#                     stdscr.chgat(lineno, begin, end, display.markup_normal)
-
-
-def get_markup_position(line, keyword):
-    start = []
-    line = list(line)
-
-    for idx, s in enumerate(line):
-        if keyword.startswith(s):
-            start.append(idx)
-
-    ret = []
-    for i in start:
-        flg = True
-        c = 1
-        while flg:
-            try:
-                if line[i+c] == keyword[i+c]:
-                    c += 1
-                else:
-                    ret.append((i, i+c))
-                    flg = False
-            except:
-                ret.append((i, i+c))
-                flg = False
-    return ret
+                begin, end = search_keyword(line, model.keyword)
+                stdscr.chgat(lineno, begin, end, display.markup_normal)
 
 
 class KeyHandler(object):

@@ -110,7 +110,7 @@ class Model(object):
         line_width = line + diff * " "
         return line_width[:self.width]
 
-    def markup(self, line):
+    def highlight(self, line):
         result = []
 
         if self.keyword:
