@@ -33,10 +33,15 @@ BG = black
 FG = white
 BG = blue
 
-[markup color]
+[string match color]
 COLOR = yellow
 
+[string match options]
+BOLD = True
+
 """
+
+# XXX Todo write debug method
 
 
 def make_tempra_config_file():
@@ -71,7 +76,10 @@ class LoadConfig(object):
         self.normal_line_options = conf._sections['normal line options']
         self.select_line_options = conf._sections['select line options']
 
-        self.markup_color = conf._sections['markup color']
+        self.string_match_color = conf.get('string match color', 'COLOR')
+        self.string_match_options = conf._sections['string match options']
+
 
 if __name__ == "__main__":
-    make_tempra_config_file()
+#     make_tempra_config_file()
+    print LoadConfig()

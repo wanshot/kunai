@@ -2,7 +2,7 @@
 import ast
 import argparse
 import textwrap
-from manage import LoadConfig
+from config import LoadConfig
 
 LOGAPPNAME = "Interactive Shell Interface"
 

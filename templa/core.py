@@ -7,12 +7,15 @@ import signal
 import threading
 import curses.ascii
 
-from manage import LoadConfig
+from config import LoadConfig
 from model import Model
 from display import Display
 from key import KeyHandler, update_lines, update_prompt
 from tty import get_ttyname, reconnect_descriptors
-from templa import __logo__
+
+__all__ = (
+    "fry",
+)
 
 locale.setlocale(locale.LC_ALL, '')
 

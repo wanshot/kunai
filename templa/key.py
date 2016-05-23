@@ -34,12 +34,14 @@ def update_lines(stdscr, model, display, select_num=1):
             if lineno == select_num:  # set first select line color
                 stdscr.addstr(lineno, 0, line, display.select)
                 stdscr.addstr(0, 15, model.keyword, display.select)
-                begin, end = search_keyword(line, model.keyword)
-                stdscr.chgat(lineno, begin, end, display.markup_select)
+                if model.keyword:
+                    for pos in search_keyword(line, model.keyword):
+                        stdscr.addnstr(lineno, pos, model.keyword, len(model.keyword), display.str_match_select)
             else:
                 stdscr.addstr(lineno, 0, line[:model.width-1], display.normal)
-                begin, end = search_keyword(line, model.keyword)
-                stdscr.chgat(lineno, begin, end, display.markup_normal)
+                if model.keyword:
+                    for pos in search_keyword(line, model.keyword):
+                        stdscr.addnstr(lineno, pos, model.keyword, len(model.keyword), display.str_match_normal)
 
 
 class KeyHandler(object):

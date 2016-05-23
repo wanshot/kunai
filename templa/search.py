@@ -3,18 +3,35 @@ from collections import defaultdict
 
 
 def search_keyword(line, pattern):
-    beg = sunday_algorithm(line, pattern)
-    end = beg + len(pattern)
-    return beg, end
+    """Scanning line
+    """
+
+    ret = []
+    begin = 0
+    position = 0
+
+    while begin >= 0:
+        begin = get_target_position(line, pattern)
+        position += begin + 1
+        if begin < 0:
+            break
+        line = line[begin+1:]
+        ret.append(position-1)
+
+    return ret
 
 
-def sunday_algorithm(line, pattern):
+def get_target_position(line, pattern):
+    """String search algorithm
+    """
+
     m, n = len(line), len(pattern)
     if m < n:
         return -1
-    bad_char_jump = defaultdict(lambda: n + 1)
+    skip_bad_char = defaultdict(lambda: n + 1)
     for i in range(n):
-        bad_char_jump[pattern[i]] = n - i
+        skip_bad_char[pattern[i]] = n - i
+
     pos = 0
     while pos <= m - n:
         i, j = pos, 0
@@ -25,8 +42,10 @@ def sunday_algorithm(line, pattern):
             # match
             return pos
         elif pos == m - n:
+            # finish
             return -1
         else:
             # skip
-            pos += bad_char_jump[line[pos + n]]
+            pos += skip_bad_char[line[pos + n]]
+    # finish
     return -1
