@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # from .exceptions import ParseError
-import re
-import itertools
+from itertools import izip_longest
 from collections import OrderedDict
 import unicodedata
 import locale
@@ -26,7 +25,7 @@ class Model(object):
 
         pages = OrderedDict()
         locale.setlocale(locale.LC_ALL, '')
-        for page_num, c in enumerate(itertools.izip_longest(*[iter(r)]*(self.height-1)), start=1):
+        for page_num, c in enumerate(izip_longest(*[iter(r)]*(self.height-1)), start=1):
             od = OrderedDict()
             for lineno, line in enumerate(c, start=1):
                 if line is None:
@@ -109,12 +108,3 @@ class Model(object):
         diff = self.width - (not_ea + (ea * 2))
         line_width = line + diff * " "
         return line_width[:self.width]
-
-    def highlight(self, line):
-        result = []
-
-        if self.keyword:
-            for x in re.finditer(ur"{}".format(self.keyword), line):
-                result.append((x.start(), x.end()))
-
-        return result

@@ -33,15 +33,15 @@ BG = black
 FG = white
 BG = blue
 
-[string match color]
+[highlight color]
 COLOR = yellow
 
-[string match options]
+[highlight options]
 BOLD = True
 
 """
 
-# XXX Todo write debug method
+# TODO write debug method
 
 
 def make_tempra_config_file():
@@ -76,8 +76,8 @@ class LoadConfig(object):
         self.normal_line_options = conf._sections['normal line options']
         self.select_line_options = conf._sections['select line options']
 
-        self.string_match_color = conf.get('string match color', 'COLOR')
-        self.string_match_options = conf._sections['string match options']
+        self.highlight_color = conf.get('highlight color', 'COLOR')
+        self.highlight_options = conf._sections['highlight options']
 
 
 if __name__ == "__main__":

@@ -8,6 +8,8 @@ LOGAPPNAME = "Interactive Shell Interface"
 
 
 class TemplaRunner(object):
+    """
+    """
 
     def __init__(self):
         self.conf = LoadConfig()
@@ -29,7 +31,7 @@ class TemplaRunner(object):
                 ret.append((node.name, ast.get_docstring(node)))
         exprs = ast.parse(self._get_templa_code(), self.conf.templa_file_path)
         _Transform().visit(exprs)
-        # Todo funcitons overlap raise
+        # TODO funcitons overlap raise
         return ret
 
     def pick_command(self, command):

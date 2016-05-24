@@ -12,7 +12,7 @@ SP_KEYS = {
 
 
 def update_prompt(stdscr, model):
-    # Todo:: move core.py
+    # TODO move view.py
     # default prompt label
     label = '%'
 #     if self.conf.input_field_label:
@@ -24,7 +24,7 @@ def update_prompt(stdscr, model):
 
 
 def update_lines(stdscr, model, display, select_num=1):
-    # Todo:: move core.py
+    # TODO move view.py
     for lineno, line in model.current_page.items():
         # overwrite line
         if line is None:
@@ -36,12 +36,12 @@ def update_lines(stdscr, model, display, select_num=1):
                 stdscr.addstr(0, 15, model.keyword, display.select)
                 if model.keyword:
                     for pos in search_keyword(line, model.keyword):
-                        stdscr.addnstr(lineno, pos, model.keyword, len(model.keyword), display.str_match_select)
+                        stdscr.addnstr(lineno, pos, model.keyword, len(model.keyword), display.highlight_select)
             else:
                 stdscr.addstr(lineno, 0, line[:model.width-1], display.normal)
                 if model.keyword:
                     for pos in search_keyword(line, model.keyword):
-                        stdscr.addnstr(lineno, pos, model.keyword, len(model.keyword), display.str_match_normal)
+                        stdscr.addnstr(lineno, pos, model.keyword, len(model.keyword), display.highlight_normal)
 
 
 class KeyHandler(object):
@@ -110,6 +110,6 @@ class KeyHandler(object):
 
     def update_keyword(self, key):
         """stub function
-        # Todo: use tty read character
         """
+        # TODO use tty read character
         self.model.keyword += curses.ascii.unctrl(key).decode("utf-8")
