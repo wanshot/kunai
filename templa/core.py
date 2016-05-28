@@ -10,7 +10,8 @@ import curses.ascii
 from config import LoadConfig
 from model import Model
 from display import Display
-from key import KeyHandler, update_lines, update_prompt
+from view import View
+from key import KeyHandler
 from tty import get_ttyname, reconnect_descriptors
 
 __all__ = (
@@ -77,18 +78,20 @@ class Templa(object):
         self.updating_timer = None
 
         def re_despiction():
-            update_prompt(self.stdscr, self.model)
-            update_lines(self.stdscr, self.model, self.display)
+            view = View(self.stdscr, self.model, self.y, self.x, self.display)
+            view.update()
 
         while True:
             try:
                 key = self.stdscr.getch()
-                keyhandler = KeyHandler(self.stdscr, self.model, self.y, self.x, self.display, key)
-                self.model = keyhandler.model
-                if keyhandler.new_pos_y:
-                    self.y = keyhandler.new_pos_y
+                keyhandler = KeyHandler(key)
+                view = View(self.stdscr, self.model, self.y, self.x,
+                            self.display, keyhandler)
+
+                if view.new_pos_y:
+                    self.y = view.new_pos_y
                 else:
-                    self.model = keyhandler.model
+                    self.model = view.model
                     self.model.update()
 
                     if self.model.keyword:
@@ -101,7 +104,8 @@ class Templa(object):
                                 # clear timer
                                 self.updating_timer.cancel()
                                 self.updating_timer = None
-                            timer = threading.Timer(self.RE_DEPICTION_DELAY, re_despiction)
+                            timer = threading.Timer(self.RE_DEPICTION_DELAY,
+                                                    re_despiction)
                             self.updating_timer = timer
                             timer.start()
 
@@ -113,8 +117,8 @@ class Templa(object):
         with self.global_lock:
             self.y, self.x = 1, 0
             self.stdscr.erase()
-            update_prompt(self.stdscr, self.model)
-            update_lines(self.stdscr, self.model, self.display)
+            view = View(self.stdscr, self.model, self.y, self.x, self.display)
+            view.update()
             self.stdscr.refresh()
 
 
