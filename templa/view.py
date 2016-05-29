@@ -18,7 +18,7 @@ class View(object):
             try:
                 getattr(self, '{}'.format(keyhandler.operate))()
             except:
-                self.update_keyword(keyhandler.key)
+                self.update_keyword(keyhandler.ch)
 
     def _update_line(self, select_num):
         for lineno, line in self.model.current_page.items():
@@ -37,6 +37,16 @@ class View(object):
                     if self.model.keyword:
                         self._hightlight_keyword(lineno, line, normal=True)
 
+    def _update_prompt(self):
+        # default prompt label
+        label = '%'
+    #     if self.conf.input_field_label:
+    #         label = self.conf.input_field_label
+
+        self.stdscr.addstr(0, 0, '{} {}{}'.format(label,
+                                                  self.model.adapted_keyword(),
+                                                  self.model.page_info))
+
     def _hightlight_keyword(self, lineno, line, normal=True):
         if normal:
             attr = self.display.highlight_normal
@@ -50,65 +60,66 @@ class View(object):
     def _display_line(self):
         # new line
         self.stdscr.chgat(self.new_pos_y, self.pos_x, -1, self.display.select)
+        if self.model.keyword:
+            self._hightlight_keyword(self.new_pos_y,
+                                     self.model.current_page[self.new_pos_y],
+                                     normal=False)
         # old line
         self.stdscr.chgat(self.pos_y, self.pos_x, -1, self.display.normal)
-
-    def _update_prompt(self):
-        # default prompt label
-        label = '%'
-    #     if self.conf.input_field_label:
-    #         label = self.conf.input_field_label
-
-        self.stdscr.addstr(0, 0, '{} {}{}'.format(label,
-                                                  self.model.adapted_keyword(),
-                                                  self.model.page_info))
+        if self.model.keyword:
+            self._hightlight_keyword(self.pos_y,
+                                     self.model.current_page[self.pos_y])
 
     def update(self, select_num=1):
         self._update_line(select_num)
         self._update_prompt()
 
     def next_line(self):
-        self.new_pos_y = self.pos_y + 1
+        if not self.model.is_singe_line:
 
-        # (last to first) call page
-        if None in self.model.current_page.values():
-            if self.model.current_page.values().index(None) < self.new_pos_y:
-                self.model.move_first_page()
+            self.new_pos_y = self.pos_y + 1
+
+            # (last to first) call page
+            if None in self.model.current_page.values():
+                if self.model.current_page.values().index(None) < self.new_pos_y:
+                    self.model.move_first_page()
+                    self.new_pos_y = 1
+                    self.update()
+
+            # next page render
+            elif self.model.height - 1 < self.new_pos_y:
+                self.model.move_next_page()
                 self.new_pos_y = 1
                 self.update()
 
-        # next page render
-        elif self.model.height - 1 < self.new_pos_y:
-            self.model.move_next_page()
-            self.new_pos_y = 1
-            self.update()
-
-        self._display_line()
+            self._display_line()
 
     def prev_line(self):
-        self.new_pos_y = self.pos_y - 1
-        if self.new_pos_y == 0:
+        if not self.model.is_singe_line:
+            self.new_pos_y = self.pos_y - 1
+            if self.new_pos_y == 0:
 
-            # (first to last) call page
-            if self.model.page_number == 1:
-                self.model.move_last_page()
-                self.new_pos_y = self.model.bottom_line_number
-                self.update(self.model.bottom_line_number)
+                # (first to last) call page
+                if self.model.page_number == 1:
+                    self.model.move_last_page()
+                    self.new_pos_y = self.model.bottom_line_number
+                    self.update(self.model.bottom_line_number)
 
-            # prev page render
-            else:
-                self.model.move_prev_page()
-                self.new_pos_y = self.model.height-1
-                self.update()
+                # prev page render
+                else:
+                    self.model.move_prev_page()
+                    self.new_pos_y = self.model.height-1
+                    self.update()
 
-        self._display_line()
+            self._display_line()
 
     def backspace(self):
         if self.model.keyword:
             self.model.keyword = self.model.keyword[:-1]
 
-    def update_keyword(self, key):
+    def update_keyword(self, ch):
         """stub function
         """
         # TODO use tty read character
-        self.model.keyword += curses.ascii.unctrl(key).decode("utf-8")
+#         self.model.keyword += curses.ascii.unctrl(key).decode("utf-8")
+        self.model.keyword += ch.decode("utf-8")

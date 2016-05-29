@@ -52,7 +52,7 @@ class Templa(object):
         curses.curs_set(0)
 
         self.display = Display(self.stdscr)
-        self.model = Model(self.ret, self.stdscr, self.height, self.width)
+        self.model = Model(self.ret, self.height, self.width)
 
         # Invalidation Ctrl + z
         signal.signal(signal.SIGINT, lambda signum, frame: None)
@@ -125,13 +125,13 @@ class Templa(object):
 class Core(object):
 
     def __init__(self, func,  **kwargs):
-        self.list_ = func()
+        self.collections = func()
 
         ttyname = get_ttyname()
 
         with open(ttyname, 'r+w') as ttyfile:
 
-            with Templa(self.list_, reconnect_descriptors(ttyfile)) as templa:
+            with Templa(self.collections, reconnect_descriptors(ttyfile)) as templa:
                 value = templa.loop()
             sys.exit(value)
 

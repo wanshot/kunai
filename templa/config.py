@@ -39,6 +39,7 @@ COLOR = yellow
 [highlight options]
 BOLD = True
 
+
 """
 
 # TODO write debug method

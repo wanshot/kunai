@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 # from .exceptions import ParseError
-from itertools import izip_longest
+from itertools import izip_longest as _zip
 from collections import OrderedDict
 import unicodedata
 import locale
 
+# Default limit
+PAGE_LIMIT = 2000
+
 
 class Model(object):
 
-    def __init__(self, list_, stdscr, height, width):
-        self.list_ = list_
-        self.stdscr = stdscr
+    def __init__(self, collections, height, width):
+        self.collections = collections
         self.height = height
         self.width = width
 
@@ -18,14 +20,16 @@ class Model(object):
         self.pages = self._create_pages()
         self.page_number = 1
 
-    def _create_pages(self, new_list=None):
-        r = self.list_
-        if isinstance(new_list, list):  # Not use only at the update
-            r = new_list
+    def _create_pages(self, new_collections=None):
+        c = self.collections
+        if isinstance(new_collections, list):  # Not use only at the update
+            c = new_collections
+
+        r = c[PAGE_LIMIT] if len(c) > PAGE_LIMIT else c
 
         pages = OrderedDict()
         locale.setlocale(locale.LC_ALL, '')
-        for page_num, c in enumerate(izip_longest(*[iter(r)]*(self.height-1)), start=1):
+        for page_num, c in enumerate(_zip(*[iter(r)]*(self.height-1)), start=1):
             od = OrderedDict()
             for lineno, line in enumerate(c, start=1):
                 if line is None:
@@ -39,8 +43,8 @@ class Model(object):
     def update(self):
         """Update Pages
         """
-        updated = [x for x in self.list_ if self.keyword in x]
-        self.pages = self._create_pages(updated)
+        new_collections = [x for x in self.collections if self.keyword in x]
+        self.pages = self._create_pages(new_collections)
         self.page_number = 1
 
     def move_next_page(self):
@@ -62,6 +66,10 @@ class Model(object):
         """Set Last Page Number
         """
         self.page_number = max(self.pages.keys())
+
+    @property
+    def is_singe_line(self):
+        return True if len(self.pages.keys()) == 1 else False
 
     @property
     def last_page_number(self):
