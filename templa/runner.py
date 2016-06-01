@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import ast
+
 import argparse
 import textwrap
-from config import LoadConfig
+from parser import TemplaParser
 
 LOGAPPNAME = "Interactive Shell Interface"
 
@@ -12,52 +12,20 @@ class TemplaRunner(object):
     """
 
     def __init__(self):
-        self.conf = LoadConfig()
-        self.commands = self._load_commands()
-        self.code_obj = None
-
-    def _get_templa_code(self):
-        file_name = self.conf.templa_file_path
-        with open(file_name, "r") as f:
-            code = f.read()
-        return code
-
-    def _load_commands(self):
-        ret = []
-
-        class _Transform(ast.NodeTransformer):
-
-            def visit_FunctionDef(self, node):
-                ret.append((node.name, ast.get_docstring(node)))
-        exprs = ast.parse(self._get_templa_code(), self.conf.templa_file_path)
-        _Transform().visit(exprs)
-        # TODO funcitons overlap raise
-        return ret
-
-    def pick_command(self, command):
-
-        class _Transform(ast.NodeTransformer):
-
-            def visit_FunctionDef(self, node):
-                if node.name == command:
-                    return node
-
-        exprs = ast.parse(self._get_templa_code(), self.conf.templa_file_path)
-        _Transform().visit(exprs)
-        self.code_obj = compile(exprs, self.conf.templa_file_path, "exec")
+        self.parser = TemplaParser()
 
     def show_commands(self):
         print u"Available commands:\n"
-        for n, d in self.commands:
+        for n, d in self.parser.commands:
             print u"    {name}  {docstring}".format(name=n,
                                                     docstring=d.replace('\n', ' '))
 
     def run(self):
-        exec self.code_obj
+        exec self.parser.code_obj
 
     @property
     def command_names(self):
-        return zip(*self.commands)[0]
+        return zip(*self.parser.commands)[0]
 
 
 def get_argparser():
@@ -94,7 +62,7 @@ def main():
     if args.list:
         templa.show_commands()
     elif args.command in templa.command_names:
-        templa.pick_command(args.command)
+        templa.parser.pick_command(args.command)
         templa.run()
     elif args.command is None:
         parser.print_help()

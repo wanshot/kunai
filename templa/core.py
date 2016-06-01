@@ -15,7 +15,7 @@ from key import KeyHandler
 from tty import get_ttyname, reconnect_descriptors
 
 __all__ = (
-    "fry",
+    'fry',
 )
 
 locale.setlocale(locale.LC_ALL, '')
@@ -68,6 +68,7 @@ class Templa(object):
     def __exit__(self, exc_type, exc_value, traceback):
         curses.nl()
         curses.endwin()
+        # TODO action
 
     # http://docs.python.jp/2/library/threading.html#timer-objects
     RE_DEPICTION_DELAY = 0.05
