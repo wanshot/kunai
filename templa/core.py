@@ -138,6 +138,11 @@ class Core(object):
 
 
 def fry(*args, **kwargs):
-
+    # call @fry
     if len(args) == 1 and callable(args[0]):
         return Core(args[0], **kwargs)
+
+    # call @fry(default_action='hoge')
+    def inner(obj):
+        return Core(obj)
+    return inner

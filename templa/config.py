@@ -3,8 +3,7 @@
 import os
 from ConfigParser import SafeConfigParser
 
-# from .exceptions import ConfigLoadError
-# from tempra.exceptions import ConfigLoadError
+
 
 TEMPRA_ROOT_DIRECTORY = os.path.expanduser('~/.tempra/')
 TEMPRA_CONF_PATH = TEMPRA_ROOT_DIRECTORY + 'temprarc'
@@ -53,6 +52,11 @@ def make_tempra_config_file():
 
 
 class LoadConfig(object):
+    """
+    Q. Why are you divided the templarc and templa.py?
+    A. Because I want to manage in the dotfiles
+       There is a possibility that contain personal information is to templa.py
+    """
 
     def __init__(self):
         self._check_config()

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import ast
 
 from config import LoadConfig
