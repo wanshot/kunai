@@ -14,16 +14,9 @@ from view import View
 from key import KeyHandler
 from action import Actions
 from tty import get_ttyname, reconnect_descriptors
+from exceptions import TerminateLoop
 
 locale.setlocale(locale.LC_ALL, '')
-
-
-class TerminateLoop(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
 
 
 class Templa(object):
@@ -79,20 +72,20 @@ class Templa(object):
         self.updating_timer = None
 
         def re_despiction():
-            view = View(self.stdscr, self.model, self.y, self.x, self.display)
-            view.update()
+            self.view = View(self.stdscr, self.model, self.y, self.x, self.display)
+            self.view.update()
 
         while True:
             try:
                 key = self.stdscr.getch()
-                keyhandler = KeyHandler(key)
-                view = View(self.stdscr, self.model, self.y, self.x,
-                            self.display, keyhandler)
+                self.keyhandler = KeyHandler(key)
+                self.view = View(self.stdscr, self.model, self.y, self.x,
+                                 self.display, self.keyhandler)
 
-                if view.new_pos_y:
-                    self.y = view.new_pos_y
+                if self.view.new_pos_y:
+                    self.y = self.view.new_pos_y
                 else:
-                    self.model = view.model
+                    self.model = self.view.model
                     self.model.update()
 
                     if self.model.keyword:
@@ -118,9 +111,22 @@ class Templa(object):
         with self.global_lock:
             self.y, self.x = 1, 0
             self.stdscr.erase()
-            view = View(self.stdscr, self.model, self.y, self.x, self.display)
-            view.update()
+            self.view = View(self.stdscr, self.model, self.y, self.x, self.display)
+            self.view.update()
             self.stdscr.refresh()
+
+    def finish(self, value=0):
+        raise TerminateLoop(self.finish_with_exit_code(value))
+
+    def cancel(self):
+        raise TerminateLoop(self.cancel_with_exit_code())
+
+    def finish_with_exit_code(self, value):
+        self.args_for_action = self.view.select_value
+        return value
+
+    def cancel_with_exit_code(self):
+        return 1
 
 
 class Core(object):

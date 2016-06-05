@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import curses
+
 from search import search_keyword
 
 
@@ -13,6 +13,7 @@ class View(object):
         self.display = display
 
         self.new_pos_y = None
+        self.select_value = None
 
         if keyhandler:
             try:
@@ -112,6 +113,9 @@ class View(object):
                     self.update()
 
             self._display_line()
+
+    def enter(self):
+        self.select_value = self.model.current_page().get(self.pos_y).strip()
 
     def backspace(self):
         if self.model.keyword:
