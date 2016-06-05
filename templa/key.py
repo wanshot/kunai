@@ -2,12 +2,14 @@
 
 import curses
 
-SP_KEYS = {
-    curses.KEY_DOWN: "next_line",
-    curses.KEY_UP: "prev_line",
-    curses.KEY_BACKSPACE: "backspace",
-    127: "backspace",
+SPECIAL_KEYS = {
+    curses.KEY_DOWN      : "next_line",
+    curses.KEY_UP        : "prev_line",
+    curses.KEY_BACKSPACE : "backspace",
+    curses.KEY_ENTER     : "enter",
+    127                  : "backspace",
 }
+
 
 KEY_MAP = {}
 
@@ -22,7 +24,7 @@ class KeyHandler(object):
 
     def handel_key(self, key):
         if self._is_special_key(key):
-            self.operate = SP_KEYS[key]
+            self.operate = SPECIAL_KEYS[key]
         elif self._is_displayable_key(key):
             self.ch = chr(key)
         elif self._is_multibyte_key(self):
@@ -36,4 +38,4 @@ class KeyHandler(object):
         pass
 
     def _is_special_key(self, key):
-        return True if key in SP_KEYS.keys() else False
+        return True if key in SPECIAL_KEYS.keys() else False

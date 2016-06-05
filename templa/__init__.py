@@ -13,4 +13,15 @@ __logo__ = """
              /_/
 """
 
-from .core import fry
+from .core import Core
+
+
+def fry(*args, **kwargs):
+    # call @fry
+    if len(args) == 1 and callable(args[0]):
+        return Core(args[0], **kwargs)
+
+    def inner(obj):
+        # call @fry()
+        return Core(obj, **kwargs)
+    return inner

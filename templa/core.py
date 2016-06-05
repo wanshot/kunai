@@ -7,16 +7,13 @@ import signal
 import threading
 import curses.ascii
 
-from config import LoadConfig
+from config import Config
 from model import Model
 from display import Display
 from view import View
 from key import KeyHandler
+from action import Actions
 from tty import get_ttyname, reconnect_descriptors
-
-__all__ = (
-    'fry',
-)
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -31,10 +28,12 @@ class TerminateLoop(Exception):
 
 class Templa(object):
 
-    def __init__(self, ret, f=None):
+    def __init__(self, ret, action_name, f=None):
         self.global_lock = threading.Lock()
         self.ret = ret
-        self.conf = LoadConfig()
+        self.action_name = action_name
+        self.action = Actions()
+        self.conf = Config()
         self.y, self.x = 1, 0
 
         if f is None:
@@ -68,6 +67,7 @@ class Templa(object):
     def __exit__(self, exc_type, exc_value, traceback):
         curses.nl()
         curses.endwin()
+        self.action.output_to_stdout("test")
         # TODO action
 
     # http://docs.python.jp/2/library/threading.html#timer-objects
@@ -127,22 +127,11 @@ class Core(object):
 
     def __init__(self, func,  **kwargs):
         self.collections = func()
-
+        action = kwargs.get('default_action')
         ttyname = get_ttyname()
 
         with open(ttyname, 'r+w') as ttyfile:
 
-            with Templa(self.collections, reconnect_descriptors(ttyfile)) as templa:
+            with Templa(self.collections, action, reconnect_descriptors(ttyfile)) as templa:
                 value = templa.loop()
             sys.exit(value)
-
-
-def fry(*args, **kwargs):
-    # call @fry
-    if len(args) == 1 and callable(args[0]):
-        return Core(args[0], **kwargs)
-
-    # call @fry(default_action='hoge')
-    def inner(obj):
-        return Core(obj)
-    return inner

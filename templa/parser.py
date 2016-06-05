@@ -2,7 +2,7 @@
 
 import ast
 
-from config import LoadConfig
+from config import Config
 from action import Actions
 
 
@@ -13,7 +13,7 @@ def add_method(cls, method):
 class TemplaParser(object):
 
     def __init__(self):
-        self.conf = LoadConfig()
+        self.conf = Config()
         self.actions = Actions()
         self.commands = self._load_commands()
         self.code_obj = None

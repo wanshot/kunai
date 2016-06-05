@@ -4,7 +4,7 @@ import curses
 from operator import or_
 from itertools import chain
 
-from config import LoadConfig
+from config import Config
 
 COLORS = {
     "black":   curses.COLOR_BLACK,
@@ -39,7 +39,7 @@ class Display(object):
 
     def __init__(self, stdscr):
 
-        self.conf = LoadConfig()
+        self.conf = Config()
 
         self.stdscr = stdscr
         curses.start_color()

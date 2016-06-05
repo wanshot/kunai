@@ -3,8 +3,6 @@
 import os
 from ConfigParser import SafeConfigParser
 
-
-
 TEMPRA_ROOT_DIRECTORY = os.path.expanduser('~/.tempra/')
 TEMPRA_CONF_PATH = TEMPRA_ROOT_DIRECTORY + 'temprarc'
 
@@ -51,7 +49,7 @@ def make_tempra_config_file():
         file.write(DEFAULT_CONFIG)
 
 
-class LoadConfig(object):
+class Config(object):
     """
     Q. Why are you divided the templarc and templa.py?
     A. Because I want to manage in the dotfiles
@@ -87,4 +85,4 @@ class LoadConfig(object):
 
 if __name__ == "__main__":
 #     make_tempra_config_file()
-    print LoadConfig()
+    print Config()
