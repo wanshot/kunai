@@ -2,7 +2,7 @@
 from collections import defaultdict
 
 
-def search_keyword(line, pattern):
+def search_query(line, pattern):
     """Scanning line
     """
 

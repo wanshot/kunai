@@ -29,10 +29,10 @@ ATTRS = {
 }
 
 
-NORMAL_LINE = 1
-SELECT_LINE = 2
-NORMAL_LINE_HL = 3
-SELECT_LINE_HL = 4
+NORMAL_NUMBER = 1
+SELECT_NUMBER = 2
+NORMAL_HL_NUMBER = 3
+SELECT_HL_NUMBER = 4
 
 
 class Display(object):
@@ -40,10 +40,11 @@ class Display(object):
     def __init__(self, stdscr):
 
         self.conf = Config()
-
         self.stdscr = stdscr
         curses.start_color()
         self._set_color()
+
+        self.height, self.width = stdscr.getmaxyx()
 
     def _set_color(self):
 
@@ -52,21 +53,21 @@ class Display(object):
         bg = self.conf.normal_line_color.get('bg', 'black')
         normal_line_fg = COLORS.get(fg, curses.COLOR_WHITE)
         normal_line_bg = COLORS.get(bg, curses.COLOR_BLACK)
-        curses.init_pair(NORMAL_LINE, normal_line_fg, normal_line_bg)
+        curses.init_pair(NORMAL_NUMBER, normal_line_fg, normal_line_bg)
         # select line
         fg = self.conf.select_line_color.get('fg', 'white')
         bg = self.conf.select_line_color.get('bg', 'blue')
         select_line_fg = COLORS.get(fg, curses.COLOR_WHITE)
         select_line_bg = COLORS.get(bg, curses.COLOR_BLUE)
-        curses.init_pair(SELECT_LINE, select_line_fg, select_line_bg)
+        curses.init_pair(SELECT_NUMBER, select_line_fg, select_line_bg)
 
         # sting match
         highlight_color = COLORS.get(self.conf.highlight_color,
                                      curses.COLOR_YELLOW)
         # normal line highlight
-        curses.init_pair(NORMAL_LINE_HL, highlight_color, normal_line_bg)
+        curses.init_pair(NORMAL_HL_NUMBER, highlight_color, normal_line_bg)
         # select line highlight
-        curses.init_pair(SELECT_LINE_HL, highlight_color, select_line_bg)
+        curses.init_pair(SELECT_HL_NUMBER, highlight_color, select_line_bg)
 
     def merge_option(self, ret, opts):
         """ make ATTRS
@@ -78,12 +79,12 @@ class Display(object):
 
     @property
     def normal(self):
-        return self.merge_option(curses.color_pair(NORMAL_LINE),
+        return self.merge_option(curses.color_pair(NORMAL_NUMBER),
                                  self.conf.normal_line_options.items())
 
     @property
     def select(self):
-        return self.merge_option(curses.color_pair(SELECT_LINE),
+        return self.merge_option(curses.color_pair(SELECT_NUMBER),
                                  self.conf.select_line_options.items())
 
     @property
@@ -92,7 +93,7 @@ class Display(object):
             self.conf.normal_line_options.items(),
             self.conf.highlight_options.items())
 
-        return self.merge_option(curses.color_pair(NORMAL_LINE_HL), opts)
+        return self.merge_option(curses.color_pair(NORMAL_HL_NUMBER), opts)
 
     @property
     def highlight_select(self):
@@ -100,4 +101,8 @@ class Display(object):
             self.conf.select_line_options.items(),
             self.conf.highlight_options.items())
 
-        return self.merge_option(curses.color_pair(SELECT_LINE_HL), opts)
+        return self.merge_option(curses.color_pair(SELECT_HL_NUMBER), opts)
+
+    @property
+    def display_size(self):
+        return self.height, self.width

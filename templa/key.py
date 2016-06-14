@@ -16,26 +16,26 @@ KEY_MAP = {}
 
 class KeyHandler(object):
 
-    def __init__(self, key):
-        self.ch = None
-        self.operate = None
+    def __init__(self):
+        self.hold_key = None
 
-        self.handel_key(key)
+    def handle_key(self, key):
 
-    def handel_key(self, key):
-        if self._is_special_key(key):
-            self.operate = SPECIAL_KEYS[key]
-        elif self._is_displayable_key(key):
-            self.ch = chr(key)
-        elif self._is_multibyte_key(self):
+        if self.is_special_key(key):
+            self.hold_key = SPECIAL_KEYS[key]
+
+        elif self.is_displayable_key(key):
+            self.hold_key = chr(key)
+
+        elif self.is_multibyte_key(self):
             # TODO support multibyte
             pass
 
-    def _is_displayable_key(self, key):
+    def is_displayable_key(self, key):
         return 32 <= key <= 126
 
-    def _is_multibyte_key(self, key):
+    def is_multibyte_key(self, key):
         pass
 
-    def _is_special_key(self, key):
+    def is_special_key(self, key):
         return True if key in SPECIAL_KEYS.keys() else False
