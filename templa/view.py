@@ -12,26 +12,18 @@ class View(object):
         self.pos_x = pos_x
         self.display = display
 
-        self.new_pos_y = None
+        self.new_pos_y = 1
         self.select_value = None
+
+        self.update()
 
         if keyhandler:
             try:
                 getattr(self, '{}'.format(keyhandler.hold_key))()
             except:
-                self.update_query(keyhandler.hold_key)
+                pass
 
-    def addstr(self, pos_y, pos_x, line, attrs=None, top_line=True):
-        if top_line:
-            self.stdscr.addstr(pos_y, pos_x, line[:self.display.width-1], self.display.select)
-            if self.model.is_query():
-                self._hightlight_query(pos_y, line, self.display.highlight_select)
-        else:
-            self.stdscr.addstr(pos_y, pos_x, line[:self.display.width-1], self.display.normal)
-            if self.model.is_query():
-                self._hightlight_query(pos_y, line, self.display.highlight_normal)
-
-    def _update_line(self, line_position):
+    def _update_lines(self, line_position):
         for lineno, line in enumerate(self.model.current_page, start=1):
             # overwrite line
             if line is None:
@@ -54,44 +46,53 @@ class View(object):
     #     if self.conf.input_field_label:
     #         label = self.conf.input_field_label
 
-        self.stdscr.addstr(0, 0, '{} {}{}'.format(label, self.model.prompt, self.model.model_info))
+        self.stdscr.addstr(0, 0, '{} {}{}'.format(label, self.model.prompt, self.model.pages_info))
 
-    def _display_line(self):
+    def _display_lines(self):
         # new line
         self.stdscr.chgat(self.new_pos_y, self.pos_x, -1, self.display.select)
-        if self.model.query:
-            self._hightlight_query(self.new_pos_y,
-                                   self.model.current_page[self.new_pos_y],
-                                   normal=False)
+#         if self.model.is_query():
+#             self._hightlight_query(self.new_pos_y,
+#                                    self.model.current_page[self.new_pos_y],
+#                                    normal=False)
         # old line
         self.stdscr.chgat(self.pos_y, self.pos_x, -1, self.display.normal)
-        if self.model.query:
-            self._hightlight_query(self.pos_y,
-                                   self.model.current_page[self.pos_y])
+#         if self.model.query:
+#             self._hightlight_query(self.pos_y,
+#                                    self.model.current_page[self.pos_y])
+
+    def addstr(self, y, x, line, attrs=None, top_line=True):
+        if top_line:
+            self.stdscr.addstr(y, x, line[:self.display.width-1], self.display.select)
+            if self.model.is_query():
+                self._hightlight_query(y, line, self.display.highlight_select)
+        else:
+            self.stdscr.addstr(y, x, line[:self.display.width-1], self.display.normal)
+            if self.model.is_query():
+                self._hightlight_query(y, line, self.display.highlight_normal)
 
     def update(self, line_position=1):
-        self._update_line(line_position)
+        self._update_lines(line_position)
         self._update_prompt()
 
     def next_line(self):
-        if not self.model.is_single_line:
 
-            self.new_pos_y = self.pos_y + 1
+        self.new_pos_y = self.pos_y + 1
 
-            # (last to first) call page
-            if None in self.model.current_page:
-                if self.model.current_page.index(None) < self.new_pos_y:
-                    self.model.move_first_page()
-                    self.new_pos_y = 1
-                    self.update()
+        # (last to first) call page
+#         if None in self.model.current_page:
+#             if self.model.current_page.index(None) < self.new_pos_y:
+#                 self.model.move_first_page()
+#                 self.new_pos_y = 1
+#                 self.update()
 
-            # next page render
-            elif self.model.display.height - 1 < self.new_pos_y:
-                self.model.move_next_page()
-                self.new_pos_y = 1
-                self.update()
+        # next page render
+#         elif self.model.display.height - 1 < self.new_pos_y:
+#             self.model.move_next_page()
+#             self.new_pos_y = 1
+#             self.update()
 
-            self._display_line()
+        self._display_lines()
 
     def prev_line(self):
         if not self.model.is_single_line:
@@ -110,7 +111,7 @@ class View(object):
                     self.new_pos_y = self.model.display.height-1
                     self.update()
 
-            self._display_line()
+            self._display_lines()
 
     def enter(self):
         self.select_value = self.model.current_page[self.pos_y].strip()
@@ -118,14 +119,4 @@ class View(object):
     def backspace(self):
         if self.model.is_query():
             self.model.query = self.model.query[:-1]
-
-    def update_query(self, ch):
-        """stub function
-        """
-        # TODO use tty read character
-#         self.model.keyword += curses.ascii.unctrl(key).decode("utf-8")
-        if ch is not None:
-            if self.model.query is None:
-                self.model.query = ch.decode("utf-8")
-            else:
-                self.model.query += ch.decode("utf-8")
+            self.model.update()

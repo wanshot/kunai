@@ -73,18 +73,14 @@ class Templa(object):
 
         def despiction():
             self.y, self.x = 1, 0
-            self.keyhandler.handle_key(self.key)
-            self.view = View(self.stdscr, self.model, self.y, self.x, self.display, self.keyhandler)
-            self.view.update()
-            self.model = self.view.model
+            self.model.update_query(self.keyhandler.hold_key)
             self.model.update()
-            self.stdscr.refresh()
+            self.refresh_display()
 
         while True:
             try:
                 self.key = self.stdscr.getch()
-                # if self.model.is_search():
-                # 入力文字
+                self.keyhandler.handle_key(self.key)
                 if self.keyhandler.is_displayable_key(self.key):
                     with self.global_lock:
 
@@ -100,15 +96,13 @@ class Templa(object):
                         self.updating_timer = timer
                         timer.start()
 
-                self.refresh_display(self.key)
+                self.refresh_display()
             except TerminateLoop as e:
                 return e.value
 
-    def refresh_display(self, key=None):
+    def refresh_display(self):
         self.stdscr.erase()
-        self.keyhandler.handle_key(key)
         self.view = View(self.stdscr, self.model, self.y, self.x, self.display, self.keyhandler)
-        self.view.update()
         self.y = self.view.new_pos_y
         self.stdscr.refresh()
 

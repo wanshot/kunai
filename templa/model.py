@@ -9,90 +9,47 @@ import locale
 PAGE_LIMIT = 2000
 
 
-class Model(object):
+class Pager(object):
 
-    def __init__(self, collections, display):
+
+class Prompt(object):
+    pass
+
+class Pager(object):
+    """
+    """
+    FIRST_PAGE_NUMBER = 1
+
+    def __init__(self, order, display):
         self.display = display
-        self.collections = collections
-        self.source = self._create_source(collections)
+        self.order = order
+        self.pages = self._create_pages(order)
         self.current_page_number = 1
-        self.current_page = [self._to_adapt_width(v) for v in self.source[self.current_page_number - 1] if v]
+        self.current_page = self._get_current_page()
         self.query = None
 
-    def _create_source(self, collections):
-        return list(_zip(*[iter(collections)]*(self.display.height-1)))
+    def create_pages(self, order):
+        return list(_zip(*[iter(order)]*(self.display.height-1)))
 
-    def _next_page_number(self):
-        if self.current_page_number == len(self.source):
+    def next_page_number(self):
+        if self.current_page_number == len(self.pages):
             return 1
         else:
             return self.current_page_number + 1
 
-    def _prev_page_number(self):
+    def prev_page_number(self):
         if self.current_page_number == 1:
-            return len(self.source)
+            return len(self.pages)
         else:
             return self.current_page_number - 1
 
-    def _update(self, number):
+    def set_current_page(self, number):
         locale.setlocale(locale.LC_ALL, '')
         self.current_page_number = number
-        self.current_page = [self._to_adapt_width(v) for v in self.source[self.current_page_number - 1] if v]
-
-    def move_next_page(self):
-        """ API
-        >>> _list = [u"hoge", u"huga", u"piyo", u'templa', u'sushi']
-        >>> model = Model(_list, 5, 3)  # width, height
-        >>> print model.current_page  # [u'hoge ', u'huga ']
-        >>> model.move_next_page()
-        >>> print model.current_page  # [u'piyo ', u'templa']
-        >>> model.move_next_page()
-        >>> print model.current_page  # [u'sushi']
-        >>> model.move_next_page()
-        >>> print model.current_page  # [u'hoge ', u'huga ']
-        """
-        self._update(self._next_page_number())
-
-    def move_prev_page(self):
-        """ API
-        >>> _list = [u"hoge", u"huga", u"piyo", u'templa', u'sushi']
-        >>> model = Model(_list, 5, 3)
-        >>> print model.current_page  # [u'hoge ', u'huga ']
-        >>> model.move_prev_page()
-        >>> print model.current_page  # [u'sushi']
-        >>> model.move_prev_page()
-        >>> print model.current_page  # [u'piyo ', u'templa']
-        >>> model.move_prev_page()
-        >>> print model.current_page  # [u'hoge ', u'huga ']
-        """
-        self._update(self._prev_page_number())
-
-    def update(self):
-        """ API
-        >>> _list = [u"hoge", u"huga", u"piyo"]
-        >>> model = Model(_list, 5, 3) # width, height
-        >>> model.query = "h"
-        >>> model.update()
-        >>> print model.current_page  # [u'hoge ', u'huga ']
-        """
-        new_collections = [v for v in self.collections if self.query in v]
-        self.source = self._create_source(new_collections)
-        self._update(1)
-
-    @property
-    def model_info(self):
-        """Display Page info
-        """
-        return u"[{}:{}]".format(self.current_page_number, len(self.source) - 1)
-
-    @property
-    def prompt(self):
-        """Display query
-        """
-        if self.query:
-            query_width = self.display.width - len(self.model_info)
-            return self._to_adapt_width(self.query)[:query_width-2]
-        return ""
+        if self.pages:
+            self.current_page = self._get_current_page()
+        else:
+            self.current_page = []
 
     def _to_adapt_width(self, line_strings):
         """ Adapt Line of string
@@ -104,27 +61,36 @@ class Model(object):
         line = line_strings + diff_count * " "
         return line[:self.display.width]
 
-    @property
+    def _get_current_page(self):
+        ret = []
+        for v in self.pages[self.current_page_number - 1]:
+            if v:
+                ret.append(self._to_adapt_width(v))
+        return ret
+
+    def is_query(self):
+        return True if self.query else False
+
     def is_single_line(self):
         return True if len(self.current_page) == 1 else False
+
+    @property
+    def pages_info(self):
+        """Display Page info
+        """
+        return "[{}:{}]".format(self.current_page_number, len(self.pages))
+
+    @property
+    def prompt(self):
+        """Display query
+        """
+        query_width = self.display.width - len(self.pages_info) - 2
+        if self.query:
+            return self._to_adapt_width(self.query)[:query_width]
+        return query_width * " "
 
     @property
     def bottom_line_number(self):
         """Bottom Line Number
         """
         return max([idx for idx, x in enumerate(self.current_page, start=1) if x])
-
-    def is_query(self):
-        return True if self.query else False
-
-
-if __name__ == "__main__":
-    _list = [u"hoge", u"huga", u"piyo", u'templa', u'sushi']
-    model = Model(_list, 5, 3)
-    print model.current_page
-    model.move_prev_page()
-    print model.current_page
-    model.move_prev_page()
-    print model.current_page
-    model.move_prev_page()
-    print model.current_page
