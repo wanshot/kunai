@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import curses
+from config import Config
 
 SPECIAL_KEYS = {
     curses.KEY_DOWN      : "next_line",
@@ -11,13 +12,21 @@ SPECIAL_KEYS = {
 }
 
 
-KEY_MAP = {}
-
-
 class KeyHandler(object):
 
-    def __init__(self):
+    def __init__(self, config):
+        self.conf = Config()
+        self.keymap = self.build_keymap()
         self.hold_key = None
+
+    def build_keymap(self):
+        keymap = {}
+
+        for key, command in self.conf.keymap.items():
+            if key != '__name__':
+                keymap[key] = command
+
+        return keymap
 
     def handle_key(self, key):
 

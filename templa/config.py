@@ -36,6 +36,11 @@ COLOR = yellow
 [highlight options]
 BOLD = True
 
+[keymap]
+TOP = move_top
+DOWN =move_down
+LEFT = move_prev_page
+RIGHT = move_next_page
 
 """
 
@@ -81,6 +86,8 @@ class Config(object):
 
         self.highlight_color = conf.get('highlight color', 'COLOR')
         self.highlight_options = conf._sections['highlight options']
+
+        self.keymap = conf._sections['keymap']
 
 
 if __name__ == "__main__":

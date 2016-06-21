@@ -37,14 +37,11 @@ SELECT_HL_NUMBER = 4
 
 class Display(object):
 
-    def __init__(self, stdscr):
+    def __init__(self):
 
         self.conf = Config()
-        self.stdscr = stdscr
         curses.start_color()
         self._set_color()
-
-        self.height, self.width = stdscr.getmaxyx()
 
     def _set_color(self):
 
@@ -102,7 +99,3 @@ class Display(object):
             self.conf.highlight_options.items())
 
         return self.merge_option(curses.color_pair(SELECT_HL_NUMBER), opts)
-
-    @property
-    def display_size(self):
-        return self.height, self.width
