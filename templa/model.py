@@ -16,16 +16,19 @@ class Screen(object):
         self.order = order
         self.height, self.width = stdscr.getmaxyx()
         self.query = u''
+        self.pos_x = 0
+        self.pos_y = 1
+        self.initialize()
 
     def initialize(self):
         self.create_pager()
         self.create_prompt()
 
     def create_prompt(self):
-        self.prompt = Prompt(self.width, self.pager.info)
+        self.prompt = Prompt(self.query, self.width, self.pager.info)
 
     def create_pager(self):
-        self.pager = Pager(self.order, self.height)
+        self.pager = Pager(self.order, self.height, self.width)
 
     def is_query(self):
         return True if self.query else False
@@ -41,10 +44,6 @@ class Screen(object):
             else:
                 self.query += query.decode("utf-8")
 
-    def refresh_display(self):
-        self.stdscr.erase()
-        self.stdscr.refresh()
-
     def move_next_page(self):
         """Command
         >>> _list = [u"hoge", u"huga", u"piyo", u'templa', u'sushi']
@@ -58,6 +57,7 @@ class Screen(object):
         >>> print model.current_page  # [u'hoge ', u'huga ']
         """
         self.pager.set_current_page(self.pager.next_page_number())
+        self.pos_y = 1
 
     def move_prev_page(self):
         """Command
@@ -72,6 +72,7 @@ class Screen(object):
         >>> print model.current_page  # [u'hoge ', u'huga ']
         """
         self.pager.set_current_page(self.pager.prev_page_number())
+        self.pos_y = 1
 
     def search_and_update(self):
         """
@@ -84,6 +85,7 @@ class Screen(object):
         new_order = [v for v in self.order if self.query in v]
         self.pager.pages = self.pager.create_pages(new_order)
         self.pager.set_current_page(self.pager.FIRST_PAGE_NUMBER)
+        self.pos_y = 1
 
     @property
     def current_page(self):
@@ -105,7 +107,7 @@ class Screen(object):
         return len([x for x in self.pager.current_page if x])
 
     @property
-    def prompt(self):
+    def result_prompt(self):
         return self.prompt.prompt_query() + self.prompt.pager_info()
 
 
@@ -113,7 +115,8 @@ class Prompt(object):
     """
     """
 
-    def __init__(self, width, pager_info):
+    def __init__(self, query, width, pager_info):
+        self.query = query
         self.info = pager_info
         self.width = width
 
@@ -121,10 +124,10 @@ class Prompt(object):
         return "[{}:{}]".format(self.info['current_page'], self.info['max_page'])
 
     def pager_info_length_byte(self):
-        return len(self.render_pager_info)
+        return len(self.pager_info())
 
     def prompt_query(self):
-        effective_width = self.width - self.pager_info_length_byte - 2
+        effective_width = self.width - self.pager_info_length_byte() - 2
         if self.query:
             return self._to_adapt_width(self.query)[:effective_width]
         return effective_width * " "
@@ -135,9 +138,9 @@ class Prompt(object):
         """
         ea_count = len([string for string in line_strings if east_asian_width(string) in ('F', 'W')])
         not_ea_count = len(line_strings) - ea_count
-        diff_count = self.display.width - (not_ea_count + (ea_count * 2))
+        diff_count = self.width - (not_ea_count + (ea_count * 2))
         line = line_strings + diff_count * " "
-        return line[:self.display.width]
+        return line[:self.width]
 
 
 class Pager(object):
@@ -145,8 +148,9 @@ class Pager(object):
     """
     FIRST_PAGE_NUMBER = 1
 
-    def __init__(self, order, height):
-        self.pages = self._create_pages(order)
+    def __init__(self, order, height, width):
+        self.width = width
+        self.pages = self.create_pages(order, height)
         self.current_page_number = 1
         self.current_page = self._get_current_page()
 
@@ -179,9 +183,9 @@ class Pager(object):
         """
         ea_count = len([string for string in line_strings if east_asian_width(string) in ('F', 'W')])
         not_ea_count = len(line_strings) - ea_count
-        diff_count = self.display.width - (not_ea_count + (ea_count * 2))
+        diff_count = self.width - (not_ea_count + (ea_count * 2))
         line = line_strings + diff_count * " "
-        return line[:self.display.width]
+        return line[:self.width]
 
     def _get_current_page(self):
         ret = []

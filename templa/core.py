@@ -7,9 +7,9 @@ import signal
 import threading
 import curses.ascii
 
-from config import Config
-from model import Model
+from model import Screen
 from display import Display
+from command import TemplaCommand
 from view import View
 from key import KeyHandler
 from action import Actions
@@ -27,8 +27,6 @@ class Templa(object):
         self.action_name = action_name
         self.action = Actions()
         self.keyhandler = KeyHandler()
-        self.conf = Config()
-        self.y, self.x = 1, 0
 
         if f is None:
             self.stdin = sys.stdin
@@ -43,8 +41,9 @@ class Templa(object):
         self.stdscr = curses.initscr()
         curses.curs_set(0)
 
-        self.display = Display(self.stdscr)
-        self.model = Model(self.ret, self.display)
+        display = Display()
+        screen = Screen(self.stdscr, self.ret)
+        self.view = View(display, screen)
 
         # Invalidation Ctrl + z
         signal.signal(signal.SIGINT, lambda signum, frame: None)
@@ -68,23 +67,21 @@ class Templa(object):
 
     def loop(self):
         # initialize
-        self.refresh_display()
+        self.view.refresh_display()
         self.updating_timer = None
 
         def despiction():
-            self.y, self.x = 1, 0
-            self.model.update_query(self.keyhandler.hold_key)
-            self.model.update()
-            self.refresh_display()
+            self.view.update()
+            self.view.refresh_display()
 
         while True:
             try:
-                self.key = self.stdscr.getch()
-                self.keyhandler.handle_key(self.key)
-                if self.keyhandler.is_displayable_key(self.key):
+                key = self.stdscr.getch()
+                self.keyhandler.handle_key(key)
+                if self.keyhandler.is_input_query:
                     with self.global_lock:
 
-                        if self.key == ord("q"):
+                        if key == ord("q"):
                             break
 
                         if self.updating_timer is not None:
@@ -96,15 +93,10 @@ class Templa(object):
                         self.updating_timer = timer
                         timer.start()
 
-                self.refresh_display()
+                TemplaCommand(self.view, self.keyhandler.state)
+                self.view.refresh_display()
             except TerminateLoop as e:
                 return e.value
-
-    def refresh_display(self):
-        self.stdscr.erase()
-        self.view = View(self.stdscr, self.model, self.y, self.x, self.display, self.keyhandler)
-        self.y = self.view.new_pos_y
-        self.stdscr.refresh()
 
     def finish(self, value=0):
         raise TerminateLoop(self.finish_with_exit_code(value))

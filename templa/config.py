@@ -37,8 +37,8 @@ COLOR = yellow
 BOLD = True
 
 [keymap]
-TOP = move_top
-DOWN =move_down
+UP = move_up
+DOWN = move_down
 LEFT = move_prev_page
 RIGHT = move_next_page
 
