@@ -71,8 +71,7 @@ class Templa(object):
         self.updating_timer = None
 
         def despiction():
-            self.view.update()
-            self.view.refresh_display()
+            self.view.search_query(self.keyhandler.hold_key)
 
         while True:
             try:
@@ -94,7 +93,6 @@ class Templa(object):
                         timer.start()
 
                 TemplaCommand(self.view, self.keyhandler.state)
-                self.view.refresh_display()
             except TerminateLoop as e:
                 return e.value
 

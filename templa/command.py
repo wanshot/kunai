@@ -15,11 +15,11 @@ class TemplaCommand(object):
             getattr(self, keyhandler)()
 
     def move_next_page(self):
-        self.screen.move_next_page()
+        self.view.screen.move_next_page()
         self.view.update()
 
     def move_prev_page(self):
-        self.screen.move_prev_page()
+        self.view.screen.move_prev_page()
         self.view.update()
 
     def move_up(self):
@@ -29,7 +29,7 @@ class TemplaCommand(object):
         self.view.move_down()
 
     def backword_word(self):
-        pass
+        self.view.backspace()
 
     def select_top(self):
         pass

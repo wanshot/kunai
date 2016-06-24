@@ -2,7 +2,7 @@
 from collections import defaultdict
 
 
-def search_query(line, pattern):
+def search_query_position(line, pattern):
     """Scanning line
     """
 
@@ -49,3 +49,6 @@ def get_target_position(line, pattern):
             pos += skip_bad_char[line[pos + n]]
     # finish
     return -1
+
+if __name__ == "__main__":
+    print search_query_position(u's', u's')

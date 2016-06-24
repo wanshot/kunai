@@ -33,13 +33,16 @@ class Screen(object):
     def is_query(self):
         return True if self.query else False
 
+    def erase_query_char(self):
+        self.query = self.query[:-1]
+
     def set_query(self, query):
         """stub function
         """
         # TODO use tty read character
         # self.model.keyword += curses.ascii.unctrl(key).decode("utf-8")
-        if query is not None:
-            if self._model.query is None:
+        if self.is_query:
+            if self.query == u'':
                 self.query = query.decode("utf-8")
             else:
                 self.query += query.decode("utf-8")
@@ -82,18 +85,22 @@ class Screen(object):
         >>> model.update()
         >>> print model.current_page  # [u'hoge ', u'huga ']
         """
-        new_order = [v for v in self.order if self.query in v]
-        self.pager.pages = self.pager.create_pages(new_order)
-        self.pager.set_current_page(self.pager.FIRST_PAGE_NUMBER)
         self.pos_y = 1
+        # pager
+        new_order = [v for v in self.order if self.query in v]
+        self.pager.pages = self.pager.create_pages(new_order, self.height)
+        self.pager.set_current_page(self.pager.FIRST_PAGE_NUMBER)
+        # prompt
+        self.create_prompt()
+
+    def is_in_display_range(self, position):
+        if position in range(1, self.height):
+            return True
+        return False
 
     @property
     def current_page(self):
         return self.pager.current_page
-
-    @property
-    def pager_height_range(self):
-        return range(1, self.height)
 
     @property
     def query_length_byte(self):
@@ -192,6 +199,9 @@ class Pager(object):
         for v in self.pages[self.current_page_number - 1]:
             if v:
                 ret.append(self._to_adapt_width(v))
+            else:
+                ret.append(v)
+
         return ret
 
     def is_single_line(self):
