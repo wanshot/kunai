@@ -3,7 +3,8 @@
 
 class TemplaCommand(object):
 
-    def __init__(self, view, keyhandler):
+    def __init__(self, templa, view, keyhandler):
+        self.templa = templa
         self.view = view
         self.execute(keyhandler)
 
@@ -37,5 +38,5 @@ class TemplaCommand(object):
     def select_bottom(self):
         pass
 
-    def select_line(self):
-        pass
+    def exit_templa(self):
+        self.templa.cancel()

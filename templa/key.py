@@ -32,12 +32,15 @@ class KeyHandler(object):
     def handle_key(self, key):
 
         if self.is_special_key(key):
-            self.hold_key = key
             self.state = self.keymap[SPECIAL_KEYS[key]]
 
         elif self.is_displayable_key(key):
             self.hold_key = chr(key)
             self.state = 'input_query'
+
+        elif self.is_ctrl_masked_key(key):
+            key = self.ctrl_masked_key_to_str(key)
+            self.state = self.keymap[key]
 
         elif self.is_multibyte_key(self):
             # TODO support multibyte
@@ -52,6 +55,10 @@ class KeyHandler(object):
     def is_special_key(self, key):
         return True if key in SPECIAL_KEYS.keys() else False
 
+    def is_ctrl_masked_key(self, key):
+        # ANSI.SYS Ctrl Key Codes
+        return 1 <= key <= 27
+
     def debug_keyhandler(self):
         print u'hold_key:"{key}", state:"{state}"'.format(key=self.hold_key,
                                                           state=self.state)
@@ -59,3 +66,8 @@ class KeyHandler(object):
     @property
     def is_input_query(self):
         return True if self.state == 'input_query' else False
+
+    def ctrl_masked_key_to_str(self, key):
+        prefix = 'ctrl-'
+        # ANSY normal key start from 96 ~
+        return prefix + chr(key + 96)

@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 # from .exceptions import ParseError
 from itertools import izip_longest as _zip
-from collections import OrderedDict
 from unicodedata import east_asian_width
 import locale
-
-# Default limit
-PAGE_LIMIT = 2000
 
 
 class Screen(object):
@@ -61,6 +57,7 @@ class Screen(object):
         """
         self.pager.set_current_page(self.pager.next_page_number())
         self.pos_y = 1
+        self.set_prompt_to_updated_current_page()
 
     def move_prev_page(self):
         """Command
@@ -76,6 +73,7 @@ class Screen(object):
         """
         self.pager.set_current_page(self.pager.prev_page_number())
         self.pos_y = 1
+        self.set_prompt_to_updated_current_page()
 
     def search_and_update(self):
         """
@@ -93,8 +91,18 @@ class Screen(object):
         # prompt
         self.create_prompt()
 
+    def set_prompt_to_updated_current_page(self):
+        """
+        """
+        self.prompt.info['current_page_number'] = self.pager.current_page_number
+
     def is_in_display_range(self, position):
         if position in range(1, self.height):
+            return True
+        return False
+
+    def is_none_line(self, pos_y):
+        if self.pager.current_page[pos_y-1] is None:
             return True
         return False
 
@@ -111,11 +119,11 @@ class Screen(object):
     def bottom_line_number(self):
         """Bottom Line Number
         """
-        return len([x for x in self.pager.current_page if x])
+        return len([x for x in self.pager.current_page if x is not None])
 
     @property
     def result_prompt(self):
-        return self.prompt.prompt_query() + self.prompt.pager_info()
+        return self.prompt.prompt_query() + self.prompt.pager_page_info()
 
 
 class Prompt(object):
@@ -127,11 +135,12 @@ class Prompt(object):
         self.info = pager_info
         self.width = width
 
-    def pager_info(self):
-        return "[{}:{}]".format(self.info['current_page'], self.info['max_page'])
+    def pager_page_info(self):
+        return "[{}:{}]".format(self.info['current_page_number'],
+                                self.info['max_page_number'])
 
     def pager_info_length_byte(self):
-        return len(self.pager_info())
+        return len(self.pager_page_info())
 
     def prompt_query(self):
         effective_width = self.width - self.pager_info_length_byte() - 2
@@ -210,6 +219,6 @@ class Pager(object):
     @property
     def info(self):
         return {
-            'max_page': len(self.pages),
-            'current_page': self.current_page_number,
+            'max_page_number': len(self.pages),
+            'current_page_number': self.current_page_number,
         }

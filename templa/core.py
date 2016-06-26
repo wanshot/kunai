@@ -80,9 +80,6 @@ class Templa(object):
                 if self.keyhandler.is_input_query:
                     with self.global_lock:
 
-                        if key == ord("q"):
-                            break
-
                         if self.updating_timer is not None:
                             # clear timer
                             self.updating_timer.cancel()
@@ -92,7 +89,7 @@ class Templa(object):
                         self.updating_timer = timer
                         timer.start()
 
-                TemplaCommand(self.view, self.keyhandler.state)
+                TemplaCommand(self, self.view, self.keyhandler.state)
             except TerminateLoop as e:
                 return e.value
 
@@ -103,7 +100,7 @@ class Templa(object):
         raise TerminateLoop(self.cancel_with_exit_code())
 
     def finish_with_exit_code(self, value):
-        self.args_for_action = self.view.select_value
+        self.args_for_action = self.view.select_line
         return value
 
     def cancel_with_exit_code(self):

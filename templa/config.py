@@ -42,6 +42,7 @@ DOWN = move_down
 LEFT = move_prev_page
 RIGHT = move_next_page
 BACKSPACE = backword_word
+CTRL-c = exit_templa
 
 """
 
