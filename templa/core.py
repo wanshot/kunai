@@ -9,7 +9,7 @@ import curses.ascii
 
 from model import Screen
 from display import Display
-from command import TemplaCommand
+from command import Command
 from view import View
 from key import KeyHandler
 from action import Actions
@@ -59,8 +59,12 @@ class Templa(object):
     def __exit__(self, exc_type, exc_value, traceback):
         curses.nl()
         curses.endwin()
-        self.action.output_to_stdout("test")
+
+        if self.args_for_action:
+            self.action.output_to_stdout(self.args_for_action)
         # TODO action
+
+    args_for_action = None
 
     # http://docs.python.jp/2/library/threading.html#timer-objects
     RE_DESPICTION_DELAY = 0.05
@@ -89,7 +93,7 @@ class Templa(object):
                         self.updating_timer = timer
                         timer.start()
 
-                TemplaCommand(self, self.view, self.keyhandler.state)
+                Command(self, self.view, self.keyhandler.state)
             except TerminateLoop as e:
                 return e.value
 

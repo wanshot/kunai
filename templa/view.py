@@ -8,9 +8,6 @@ class View(object):
         self.display = display
         self.screen = screen
 
-    def addstr(self, y, x, line, attrs=None):
-        self.screen.stdscr.addstr(y, x, line[:self.screen.width - 1], attrs)
-
     def hightlight_query(self, lineno, line, attr):
         """
         """
@@ -28,10 +25,13 @@ class View(object):
 
         for idx, line in enumerate(self.screen.current_page, start=1):
             if line is not None:
+                try:
+                    self.screen.stdscr.addnstr(idx, 0, line, self.screen.width)
+                except:
+                    pass
+
                 if idx == self.screen.pos_y:
-                    self.addstr(idx, 0, line, self.display.select)
-                else:
-                    self.addstr(idx, 0, line, self.display.normal)
+                    self.screen.stdscr.chgat(idx, self.screen.pos_x, -1, self.display.select)
             else:
                 self.screen.stdscr.move(idx, 0)
                 self.screen.stdscr.clrtoeol()
@@ -50,7 +50,7 @@ class View(object):
     def render_prompt(self):
         """
         """
-        self.addstr(0, 0, self.screen.result_prompt, self.display.normal)
+        self.screen.stdscr.addnstr(0, 0, self.screen.result_prompt, self.screen.width, self.display.normal)
 
     def update(self):
         """
@@ -108,3 +108,19 @@ class View(object):
         self.screen.stdscr.erase()
         self.update()
         self.screen.stdscr.refresh()
+
+    @property
+    def select_line(self):
+        return self.screen.current_page[self.screen.pos_y - 1]
+
+if __name__ == "__main__":
+    import locale
+    import curses
+    from model import Screen
+    from display import Display
+    locale.setlocale(locale.LC_ALL, '')
+    stdscr = curses.initscr()
+    screen = Screen(stdscr, [u"aaaaa", u"bbbb"])
+    display = Display()
+    view = View(display, screen)
+    view.render_current_page()

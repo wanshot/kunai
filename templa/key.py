@@ -26,6 +26,8 @@ class KeyHandler(object):
         for key, command in self.conf.keymap.items():
             if key != '__name__':
                 keymap[key] = command
+            if key == 'enter':
+                keymap['ctrl-m'] = command
 
         return keymap
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-class TemplaCommand(object):
+class Command(object):
 
     def __init__(self, templa, view, keyhandler):
         self.templa = templa
@@ -32,11 +32,14 @@ class TemplaCommand(object):
     def backword_word(self):
         self.view.backspace()
 
-    def select_top(self):
+    def select_top_line(self):
         pass
 
-    def select_bottom(self):
+    def select_bottom_line(self):
         pass
 
     def exit_templa(self):
         self.templa.cancel()
+
+    def select_line(self):
+        self.templa.finish()

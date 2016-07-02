@@ -197,11 +197,13 @@ class Pager(object):
         """ Adapt Line of string
         line: Unicode
         """
-        ea_count = len([string for string in line_strings if east_asian_width(string) in ('F', 'W')])
-        not_ea_count = len(line_strings) - ea_count
-        diff_count = self.width - (not_ea_count + (ea_count * 2))
-        line = line_strings + diff_count * " "
-        return line[:self.width]
+        from wcwidth import wcswidth
+        text_len = wcswidth(line_strings)
+#         ea_count = len([string for string in line_strings if east_asian_width(string) in ('F', 'W')])
+#         not_ea_count = len(line_strings) - ea_count
+#         diff_count = self.width - (not_ea_count + (ea_count * 2))
+#         line = line_strings + diff_count * "x"
+        return line_strings + (self.width - text_len) * u' '
 
     def _get_current_page(self):
         ret = []
@@ -209,6 +211,7 @@ class Pager(object):
             if v:
                 ret.append(self._to_adapt_width(v))
             else:
+                # append None
                 ret.append(v)
 
         return ret
