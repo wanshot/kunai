@@ -13,6 +13,7 @@ from command import Command
 from view import View
 from key import KeyHandler
 from action import Actions
+from parser import ExecFileParser
 from tty import get_ttyname, reconnect_descriptors
 from exceptions import TerminateLoop
 
@@ -21,21 +22,23 @@ locale.setlocale(locale.LC_ALL, '')
 
 class Templa(object):
 
-    def __init__(self, ret, action_name, f=None):
+    RE_DESPICTION_DELAY = 0.05
+
+    def __init__(self, ret, parser, descriptors=None):
         self.global_lock = threading.Lock()
         self.ret = ret
-        self.action_name = action_name
-        self.action = Actions()
+        self.parser = parser
+        self.args_for_action = None
         self.keyhandler = KeyHandler()
 
-        if f is None:
+        if descriptors is None:
             self.stdin = sys.stdin
             self.stdout = sys.stdout
             self.stderr = sys.stderr
         else:
-            self.stdin = f["stdin"]
-            self.stdout = f["stdout"]
-            self.stderr = f["stderr"]
+            self.stdin = descriptors["stdin"]
+            self.stdout = descriptors["stdout"]
+            self.stderr = descriptors["stderr"]
 
     def __enter__(self):
         self.stdscr = curses.initscr()
@@ -59,15 +62,7 @@ class Templa(object):
     def __exit__(self, exc_type, exc_value, traceback):
         curses.nl()
         curses.endwin()
-
-        if self.args_for_action:
-            self.action.output_to_stdout(self.args_for_action)
-        # TODO action
-
-    args_for_action = None
-
-    # http://docs.python.jp/2/library/threading.html#timer-objects
-    RE_DESPICTION_DELAY = 0.05
+        exec self.parser.code_obj
 
     def loop(self):
         # initialize
@@ -95,7 +90,7 @@ class Templa(object):
 
                 Command(self, self.view, self.keyhandler.state)
             except TerminateLoop as e:
-                return e.value
+                return e.value, self.args_for_action
 
     def finish(self, value=0):
         raise TerminateLoop(self.finish_with_exit_code(value))
@@ -115,11 +110,21 @@ class Core(object):
 
     def __init__(self, func,  **kwargs):
         self.collections = func()
-        action = kwargs.get('default_action')
+        self.action_name = kwargs.get('default_action')
+        self.parser = ExecFileParser()
         ttyname = get_ttyname()
+        self.action = Actions()
 
-        with open(ttyname, 'r+w') as ttyfile:
+        self.parser.pick_command(self.action_name)
 
-            with Templa(self.collections, action, reconnect_descriptors(ttyfile)) as templa:
-                value = templa.loop()
-            sys.exit(value)
+        with open(ttyname, 'r+w') as tty_file:
+
+            with Templa(self.collections, self.parser, reconnect_descriptors(tty_file)) as templa:
+                value, args_for_action = templa.loop()
+
+#         self._run_action(args_for_action)
+        sys.exit(value)
+
+#     def _run_action(self, args_for_action):
+#         sys.stdout.close()
+#         exec self.parser.code_obj

@@ -2,7 +2,7 @@
 
 import argparse
 import textwrap
-from parser import TemplaParser
+from parser import ExecFileParser
 
 LOGAPPNAME = "Interactive Shell Interface"
 
@@ -12,7 +12,7 @@ class TemplaRunner(object):
     """
 
     def __init__(self):
-        self.parser = TemplaParser()
+        self.parser = ExecFileParser()
 
     def show_commands(self):
         print u"Available commands:\n"

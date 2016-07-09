@@ -5,9 +5,9 @@ import sys
 
 
 def get_ttyname():
-    for f in sys.stdin, sys.stdout, sys.stderr:
-        if f.isatty():
-            return os.ttyname(f.fileno())
+    for file_obj in (sys.stdin, sys.stdout, sys.stderr):
+        if file_obj.isatty():
+            return os.ttyname(file_obj.fileno())
     return None
 
 
@@ -19,16 +19,15 @@ def reconnect_descriptors(tty):
     tty_desc = tty.fileno()
 
     for name, mode in stdios:
-        f = getattr(sys, name)
+        file_obj = getattr(sys, name)
 
-        if f.isatty():
-            # f is TTY
-            target[name] = f
+        if file_obj.isatty():
+            target[name] = file_obj
         else:
             # f is other process's output / input or a file
 
             # save descriptor connected with other process
-            std_desc = f.fileno()
+            std_desc = file_obj.fileno()
             other_desc = os.dup(std_desc)
 
             # set std descriptor. std_desc become invalid.

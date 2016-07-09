@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import subprocess
 
 
 class Actions(object):
@@ -19,4 +20,6 @@ class Actions(object):
     def output_to_stdout(self, ret):
         """default action
         """
-        sys.stdout.write(ret)
+        subprocess.check_output(ret.strip(), shell=True, stderr=subprocess.STDOUT)
+#         sys.stdout.write(ret)
+#         sys.stdout.write('\n')

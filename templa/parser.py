@@ -3,18 +3,16 @@
 import ast
 
 from config import Config
-from action import Actions
 
 
 def add_method(cls, method):
     setattr(cls, method.__name__, method)
 
 
-class TemplaParser(object):
+class ExecFileParser(object):
 
     def __init__(self):
         self.conf = Config()
-        self.actions = Actions()
         self.commands = self._load_commands()
         self.code_obj = None
 
