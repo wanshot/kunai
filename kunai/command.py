@@ -2,6 +2,9 @@
 
 
 class Command(object):
+    """UserOperateCommand
+    model < view < command
+    """
 
     def __init__(self, templa, view, keyhandler):
         self.templa = templa

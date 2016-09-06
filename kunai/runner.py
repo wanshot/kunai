@@ -7,7 +7,7 @@ from parser import ExecFileParser
 LOGAPPNAME = "Interactive Shell Interface"
 
 
-class TemplaRunner(object):
+class KunaiRunner(object):
     """
     """
 
@@ -29,10 +29,10 @@ class TemplaRunner(object):
 
 
 def get_argparser():
-    from templa import __version__, __logo__
+    from kunai import __version__, __logo__
 
     parser = argparse.ArgumentParser(
-        usage='templa <command>',
+        usage='kunai <command>',
         description=textwrap.dedent(
             "{description}{logo}".format(description=LOGAPPNAME, logo=__logo__)),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -42,7 +42,7 @@ def get_argparser():
                         action='version',
                         version='{version}'.format(version=__version__))
 
-    # List templa commands found in loaded templafiles/source files
+    # List kunai commands found in loaded kunaifiles/source files
     parser.add_argument('-l', '--list',
                         action='store_true',
                         default=False,
@@ -56,15 +56,15 @@ def get_argparser():
 
 
 def main():
-    templa = TemplaRunner()
+    kunai = KunaiRunner()
     parser = get_argparser()
     args = parser.parse_args()
     if args.list:
-        templa.show_commands()
-    elif args.command in templa.command_names:
-        templa.parser.pick_command(args.command)
-        templa.run()
+        kunai.show_commands()
+    elif args.command in kunai.command_names:
+        kunai.parser.pick_command(args.command)
+        kunai.run()
     elif args.command is None:
         parser.print_help()
     else:
-        print u"{command} is not templa command".format(command=args.command)
+        print u"{command} is not kunai command".format(command=args.command)

@@ -4,6 +4,10 @@ from collections import defaultdict
 
 def search_query_position(line, pattern):
     """Scanning line
+    :param str line: kunai line
+    :param str pattern: match
+    :rtype: list
+    :return: Position of the matched strings
     """
 
     ret = []
@@ -15,8 +19,8 @@ def search_query_position(line, pattern):
         position += begin + 1
         if begin < 0:
             break
-        line = line[begin+1:]
-        ret.append(position-1)
+        line = line[begin + 1:]
+        ret.append(position - 1)
 
     return ret
 
@@ -51,4 +55,4 @@ def get_target_position(line, pattern):
     return -1
 
 if __name__ == "__main__":
-    print search_query_position(u's', u's')
+    print search_query_position(u'sss', u's')

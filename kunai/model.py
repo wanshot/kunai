@@ -8,6 +8,8 @@ import locale
 class Screen(object):
 
     def __init__(self, stdscr, order):
+        if isinstance(order, dict):
+            order = order.keys()
         self.stdscr = stdscr
         self.order = order
         self.height, self.width = stdscr.getmaxyx()
@@ -102,7 +104,7 @@ class Screen(object):
         return False
 
     def is_none_line(self, pos_y):
-        if self.pager.current_page[pos_y-1] is None:
+        if self.pager.current_page[pos_y - 1] is None:
             return True
         return False
 
@@ -152,11 +154,14 @@ class Prompt(object):
         """ Adapt Line of string
         line: Unicode
         """
-        ea_count = len([string for string in line_strings if east_asian_width(string) in ('F', 'W')])
-        not_ea_count = len(line_strings) - ea_count
-        diff_count = self.width - (not_ea_count + (ea_count * 2))
-        line = line_strings + diff_count * " "
-        return line[:self.width]
+        from wcwidth import wcswidth
+        text_len = wcswidth(line_strings)
+#         ea_count = len([string for string in line_strings if east_asian_width(string) in ('F', 'W')])
+#         not_ea_count = len(line_strings) - ea_count
+#         diff_count = self.width - (not_ea_count + (ea_count * 2))
+#         line = line_strings + diff_count * " "
+#         return line[:self.width]
+        return line_strings + (self.width - text_len) * u' '
 
 
 class Pager(object):
@@ -171,7 +176,7 @@ class Pager(object):
         self.current_page = self._get_current_page()
 
     def create_pages(self, order, height):
-        return list(_zip(*[iter(order)]*(height-1)))
+        return list(_zip(*[iter(order)] * (height - 1)))
 
     def next_page_number(self):
         if self.current_page_number == len(self.pages):

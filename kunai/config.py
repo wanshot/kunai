@@ -3,12 +3,15 @@
 import os
 from ConfigParser import SafeConfigParser
 
-TEMPRA_ROOT_DIRECTORY = os.path.expanduser('~/.tempra/')
-TEMPRA_CONF_PATH = TEMPRA_ROOT_DIRECTORY + 'temprarc'
+KUNAI_ROOT_DIRECTORY = os.path.expanduser('~/.kunai.d/')
+KUNAI_CONF_PATH = KUNAI_ROOT_DIRECTORY + 'kunairc'
 
 DEFAULT_CONFIG = """
 [base]
-TEMPLA_FILE_PATH =
+KUNAI_FILE_PATH =
+
+[shell executable]
+SHELL = /bin/sh
 
 [prompt]
 # DEFAULT: `> `
@@ -23,10 +26,16 @@ BOLD = True
 UNDERLINE = True
 
 [normal line color]
+TEXT = while
+BACKGROUND = black
+
 FG = white
 BG = black
 
 [select line color]
+TEXT = while
+BACKGROUND = blue
+
 FG = white
 BG = blue
 
@@ -51,9 +60,9 @@ ENTER = select_line
 
 
 def make_tempra_config_file():
-    if not os.path.exists(TEMPRA_ROOT_DIRECTORY):
-        os.makedirs(TEMPRA_ROOT_DIRECTORY)
-    with open(TEMPRA_CONF_PATH, 'w+') as file:
+    if not os.path.exists(KUNAI_ROOT_DIRECTORY):
+        os.makedirs(KUNAI_ROOT_DIRECTORY)
+    with open(KUNAI_CONF_PATH, 'w+') as file:
         file.write(DEFAULT_CONFIG)
 
 
@@ -69,17 +78,18 @@ class Config(object):
         self._load()
 
     def _check_config(self):
-        if not os.path.exists(TEMPRA_ROOT_DIRECTORY):
-            raise IndexError('.tempra directory is not found')
-        if not os.path.isfile(TEMPRA_CONF_PATH):
-            raise IndexError('temprarc is not found')
+        if not os.path.exists(KUNAI_ROOT_DIRECTORY):
+            raise IndexError('.kunai directory is not found')
+        if not os.path.isfile(KUNAI_CONF_PATH):
+            raise IndexError('kunairc is not found')
 
     def _load(self):
         conf = SafeConfigParser()
-        conf.read(TEMPRA_CONF_PATH)
+        conf.read(KUNAI_CONF_PATH)
 
-        self.templa_file_path = conf.get('base', 'TEMPLA_FILE_PATH')
+        self.kunai_file_path = conf.get('base', 'KUNAI_FILE_PATH')
         self.input_field_label = conf.get('prompt', 'INPUT_FIELD_LABEL')
+        self.shell = conf.get('shell executable', 'SHELL')
 
         self.normal_line_color = conf._sections['normal line color']
         self.select_line_color = conf._sections['select line color']
@@ -94,5 +104,4 @@ class Config(object):
 
 
 if __name__ == "__main__":
-#     make_tempra_config_file()
     print Config()

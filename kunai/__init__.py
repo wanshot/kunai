@@ -6,22 +6,22 @@ __author__ = 'wanshot'
 __author_email__ = 'nishikawa0228@sj9.so-net.ne.jp'
 
 __logo__ = """
-   __                 __
-  / /____ __ _  ___  / /__ _
- / __/ -_)  ' \/ _ \/ / _ `/
- \__/\__/_/_/_/ .__/_/\_,_/
-             /_/
+      __                     _
+     / /____  ______  ____ _(_)
+    / //_/ / / / __ \/ __ `/ /
+   / ,< / /_/ / / / / /_/ / /
+  /_/|_|\__,_/_/ /_/\__,_/_/
 """
 
-from .core import Core
+from .cli import Core
 
 
-def fry(*args, **kwargs):
-    # call @fry
+def render(*args, **kwargs):
+    # call @render
     if len(args) == 1 and callable(args[0]):
         return Core(args[0], **kwargs)
 
     def inner(obj):
-        # call @fry()
+        # call @render()
         return Core(obj, **kwargs)
     return inner

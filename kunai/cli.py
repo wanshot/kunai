@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import types
 import curses
 import locale
 import signal
 import threading
+import subprocess
 import curses.ascii
 
 from model import Screen
@@ -12,40 +14,44 @@ from display import Display
 from command import Command
 from view import View
 from key import KeyHandler
-from action import Actions
 from parser import ExecFileParser
 from tty import get_ttyname, reconnect_descriptors
 from exceptions import TerminateLoop
+from config import Config
 
 locale.setlocale(locale.LC_ALL, '')
 
 
-class Templa(object):
+class Kunai(object):
 
     RE_DESPICTION_DELAY = 0.05
 
-    def __init__(self, ret, parser, descriptors=None):
+    def __init__(self, function_name, order, kwargs, descriptors=None):
         self.global_lock = threading.Lock()
-        self.ret = ret
-        self.parser = parser
+        self.render_name = function_name
+        self.order = order
+        self.action_name = kwargs.get('action')
         self.args_for_action = None
+        self.parser = ExecFileParser()
         self.keyhandler = KeyHandler()
+        self.conf = Config()
 
         if descriptors is None:
             self.stdin = sys.stdin
             self.stdout = sys.stdout
             self.stderr = sys.stderr
         else:
-            self.stdin = descriptors["stdin"]
-            self.stdout = descriptors["stdout"]
-            self.stderr = descriptors["stderr"]
+            self.stdin = descriptors['stdin']
+            self.stdout = descriptors['stdout']
+            self.stderr = descriptors['stderr']
 
     def __enter__(self):
         self.stdscr = curses.initscr()
+#         curses.delay_output(5000)
         curses.curs_set(0)
 
         display = Display()
-        screen = Screen(self.stdscr, self.ret)
+        screen = Screen(self.stdscr, self.order)
         self.view = View(display, screen)
 
         # Invalidation Ctrl + z
@@ -60,9 +66,24 @@ class Templa(object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """Exit and action or call next kunai action
+        """
         curses.nl()
         curses.endwin()
-        exec self.parser.code_obj
+        if self.action_name:
+            # next action
+            self.parser.pick_command(self.action_name)
+            for const in self.parser.code_obj.co_consts:
+                # XXX get only action method code object
+                if isinstance(const, types.CodeType):
+                    self.parser.set_env_code(const)
+                    exec(self.parser.code_obj, {
+                        # set globals
+                        self.render_name: self.args_for_action,
+                    })
+        else:
+            # finish
+            self.execute_command()
 
     def loop(self):
         # initialize
@@ -90,7 +111,7 @@ class Templa(object):
 
                 Command(self, self.view, self.keyhandler.state)
             except TerminateLoop as e:
-                return e.value, self.args_for_action
+                return e.value
 
     def finish(self, value=0):
         raise TerminateLoop(self.finish_with_exit_code(value))
@@ -99,32 +120,48 @@ class Templa(object):
         raise TerminateLoop(self.cancel_with_exit_code())
 
     def finish_with_exit_code(self, value):
-        self.args_for_action = self.view.select_line
+        if isinstance(self.order, dict):
+            self.args_for_action = self.order[self.view.select_line.strip()]
+        else:
+            self.args_for_action = self.view.select_line
         return value
 
     def cancel_with_exit_code(self):
         return 1
 
+    def execute_command(self):
+        """execute_command
+        kunai default action
+        """
+        p = subprocess.Popen(
+            self.args_for_action,
+            stdout=subprocess.PIPE,
+            shell=True,
+            executable=self.conf.shell
+        )
+        (output, err) = p.communicate()
+        self.stdout.write(output)
+
 
 class Core(object):
 
-    def __init__(self, func,  **kwargs):
-        self.collections = func()
-        self.action_name = kwargs.get('default_action')
-        self.parser = ExecFileParser()
+    def __init__(self, function, action_name=None, **kwargs):
+        order = function()
+        function_name = function.__name__
         ttyname = get_ttyname()
-        self.action = Actions()
 
-        self.parser.pick_command(self.action_name)
+        if isinstance(order, list) or isinstance(order, dict):
 
-        with open(ttyname, 'r+w') as tty_file:
+            with open(ttyname, 'r+w') as tty_file:
 
-            with Templa(self.collections, self.parser, reconnect_descriptors(tty_file)) as templa:
-                value, args_for_action = templa.loop()
+                with Kunai(
+                        function_name,
+                        order,
+                        kwargs,
+                        reconnect_descriptors(tty_file)
+                ) as kunai:
+                    value = kunai.loop()
+        else:
+            value = u"argment is not list or dict"
 
-#         self._run_action(args_for_action)
         sys.exit(value)
-
-#     def _run_action(self, args_for_action):
-#         sys.stdout.close()
-#         exec self.parser.code_obj

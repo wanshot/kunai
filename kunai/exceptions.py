@@ -3,7 +3,7 @@
 
 class BaseError(Exception):
     """
-    Baseclass for all tempra errors.
+    Baseclass for all kunai errors.
     """
     pass
 
@@ -17,7 +17,7 @@ class TerminateLoop(BaseError):
         return repr(self.value)
 
 
-class TempraError(BaseError):
+class KunaiError(BaseError):
     """
     """
 
