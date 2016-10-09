@@ -208,7 +208,9 @@ class Pager(object):
 #         not_ea_count = len(line_strings) - ea_count
 #         diff_count = self.width - (not_ea_count + (ea_count * 2))
 #         line = line_strings + diff_count * "x"
-        return line_strings + (self.width - text_len) * u' '
+#         return line
+        x = line_strings + (self.width - text_len) * u' '
+        return x.encode('utf-8')
 
     def _get_current_page(self):
         ret = []

@@ -7,25 +7,25 @@ from itertools import chain
 from config import Config
 
 COLORS = {
-    "black":   curses.COLOR_BLACK,
-    "red":     curses.COLOR_RED,
-    "green":   curses.COLOR_GREEN,
-    "yellow":  curses.COLOR_YELLOW,
-    "blue":    curses.COLOR_BLUE,
-    "magenta": curses.COLOR_MAGENTA,
-    "cyan":    curses.COLOR_CYAN,
-    "white":   curses.COLOR_WHITE,
+    'black':   curses.COLOR_BLACK,
+    'red':     curses.COLOR_RED,
+    'green':   curses.COLOR_GREEN,
+    'yellow':  curses.COLOR_YELLOW,
+    'blue':    curses.COLOR_BLUE,
+    'magenta': curses.COLOR_MAGENTA,
+    'cyan':    curses.COLOR_CYAN,
+    'white':   curses.COLOR_WHITE,
 }
 
 ATTRS = {
-    "altcharset": curses.A_ALTCHARSET,
-    "blink":      curses.A_BLINK,
-    "bold":       curses.A_BOLD,
-    "dim":        curses.A_DIM,
-    "normal":     curses.A_NORMAL,
-    "standout":   curses.A_STANDOUT,
-    "underline":  curses.A_UNDERLINE,
-    "reverse":    curses.A_REVERSE,
+    'altcharset': curses.A_ALTCHARSET,
+    'blink':      curses.A_BLINK,
+    'bold':       curses.A_BOLD,
+    'dim':        curses.A_DIM,
+    'normal':     curses.A_NORMAL,
+    'standout':   curses.A_STANDOUT,
+    'underline':  curses.A_UNDERLINE,
+    'reverse':    curses.A_REVERSE,
 }
 
 

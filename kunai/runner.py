@@ -2,6 +2,7 @@
 
 import argparse
 import textwrap
+from ansi import term
 from parser import ExecFileParser
 
 LOGAPPNAME = "Interactive Shell Interface"
@@ -17,8 +18,10 @@ class KunaiRunner(object):
     def show_commands(self):
         print u"Available commands:\n"
         for n, d in self.parser.commands:
-            print u"    {name}  {docstring}".format(name=n,
-                                                    docstring=d.replace('\n', ' '))
+            print u"    {name}  {docstring}".format(
+                name=n,
+                docstring=d.replace('\n', ' ')
+            )
 
     def run(self):
         exec self.parser.code_obj
@@ -34,7 +37,9 @@ def get_argparser():
     parser = argparse.ArgumentParser(
         usage='kunai <command>',
         description=textwrap.dedent(
-            "{description}{logo}".format(description=LOGAPPNAME, logo=__logo__)),
+            term(LOGAPPNAME, fg_color="red") +
+            term(__logo__, fg_color="red", style="bold")
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 

@@ -4,11 +4,11 @@ import curses
 from config import Config
 
 SPECIAL_KEYS = {
-    curses.KEY_DOWN      : "down",
-    curses.KEY_UP        : "up",
-    curses.KEY_BACKSPACE : "backspace",
-    curses.KEY_ENTER     : "enter",
-    127                  : "backspace",
+    curses.KEY_DOWN      : 'down',
+    curses.KEY_UP        : 'up',
+    curses.KEY_BACKSPACE : 'backspace',
+    curses.KEY_ENTER     : 'enter',
+    127                  : 'backspace',
 }
 
 

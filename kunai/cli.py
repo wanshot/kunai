@@ -94,6 +94,7 @@ class Kunai(object):
             self.view.search_query(self.keyhandler.hold_key)
 
         while True:
+            self.view.refresh_display()
             try:
                 key = self.stdscr.getch()
                 self.keyhandler.handle_key(key)
@@ -121,7 +122,7 @@ class Kunai(object):
 
     def finish_with_exit_code(self, value):
         if isinstance(self.order, dict):
-            self.args_for_action = self.order[self.view.select_line.strip()]
+            self.args_for_action = self.order[self.view.select_line.strip().decode('utf-8')]
         else:
             self.args_for_action = self.view.select_line
         return value

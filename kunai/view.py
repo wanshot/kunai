@@ -112,15 +112,3 @@ class View(object):
     @property
     def select_line(self):
         return self.screen.current_page[self.screen.pos_y - 1]
-
-if __name__ == "__main__":
-    import locale
-    import curses
-    from model import Screen
-    from display import Display
-    locale.setlocale(locale.LC_ALL, '')
-    stdscr = curses.initscr()
-    screen = Screen(stdscr, [u"aaaaa", u"bbbb"])
-    display = Display()
-    view = View(display, screen)
-    view.render_current_page()
