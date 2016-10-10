@@ -2,8 +2,8 @@
 
 
 class Command(object):
-    """UserOperateCommand
-    model < view < command
+    """User operate command
+    Model < View < Command
     """
 
     def __init__(self, templa, view, keyhandler):

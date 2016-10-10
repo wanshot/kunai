@@ -16,7 +16,7 @@ class View(object):
             self.screen.stdscr.addnstr(lineno,
                                        pos_x,
                                        self.screen.query,
-                                       self.screen.query_length_byte,
+                                       self.screen.query_byte_count,
                                        attr)
 
     def render_current_page(self):
@@ -41,7 +41,7 @@ class View(object):
         """
 
         for idx, line in enumerate(self.screen.current_page, start=1):
-            if line is not None and self.screen.is_query():
+            if line is not None and self.screen.query:
                 if idx == self.screen.pos_y:
                     self.hightlight_query(idx, line, self.display.highlight_select)
                 else:
@@ -50,7 +50,7 @@ class View(object):
     def render_prompt(self):
         """
         """
-        self.screen.stdscr.addnstr(0, 0, self.screen.result_prompt, self.screen.width, self.display.normal)
+        self.screen.stdscr.addnstr(0, 0, self.screen.prompt_line, self.screen.width, self.display.normal)
 
     def update(self):
         """
@@ -61,7 +61,7 @@ class View(object):
 
     def move_down(self):
         new_pos_y = self.screen.pos_y + 1
-        if self.screen.is_in_display_range(new_pos_y):
+        if self.screen.is_within_display_range(new_pos_y):
             if not self.screen.is_none_line(new_pos_y):
                 # new line
                 self.screen.stdscr.chgat(new_pos_y, self.screen.pos_x, -1, self.display.select)
@@ -79,7 +79,7 @@ class View(object):
 
     def move_up(self):
         new_pos_y = self.screen.pos_y - 1
-        if self.screen.is_in_display_range(new_pos_y):
+        if self.screen.is_within_display_range(new_pos_y):
             if not self.screen.is_none_line(new_pos_y):
                 # new line
                 self.screen.stdscr.chgat(new_pos_y, self.screen.pos_x, -1, self.display.select)

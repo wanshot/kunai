@@ -2,6 +2,7 @@
 
 import argparse
 import textwrap
+
 from ansi import term
 from parser import ExecFileParser
 
@@ -37,8 +38,8 @@ def get_argparser():
     parser = argparse.ArgumentParser(
         usage='kunai <command>',
         description=textwrap.dedent(
-            term(LOGAPPNAME, fg_color="red") +
-            term(__logo__, fg_color="red", style="bold")
+            term(LOGAPPNAME, fg_color='red') +
+            term(__logo__, fg_color='red', style='bold')
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -54,7 +55,7 @@ def get_argparser():
                         help="print list of possible commands and exit")
 
     parser.add_argument('command',
-                        nargs="?",
+                        nargs='?',
                         type=str)
 
     return parser
@@ -72,4 +73,4 @@ def main():
     elif args.command is None:
         parser.print_help()
     else:
-        print u"{command} is not kunai command".format(command=args.command)
+        print u'{command} is not kunai command'.format(command=args.command)

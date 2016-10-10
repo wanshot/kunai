@@ -26,10 +26,10 @@ class Kunai(object):
 
     RE_DESPICTION_DELAY = 0.05
 
-    def __init__(self, function_name, order, kwargs, descriptors=None):
+    def __init__(self, function_name, request, kwargs, descriptors=None):
         self.global_lock = threading.Lock()
         self.render_name = function_name
-        self.order = order
+        self.request = request
         self.action_name = kwargs.get('action')
         self.args_for_action = None
         self.parser = ExecFileParser()
@@ -47,11 +47,10 @@ class Kunai(object):
 
     def __enter__(self):
         self.stdscr = curses.initscr()
-#         curses.delay_output(5000)
         curses.curs_set(0)
 
         display = Display()
-        screen = Screen(self.stdscr, self.order)
+        screen = Screen(self.stdscr, self.request)
         self.view = View(display, screen)
 
         # Invalidation Ctrl + z
@@ -121,8 +120,8 @@ class Kunai(object):
         raise TerminateLoop(self.cancel_with_exit_code())
 
     def finish_with_exit_code(self, value):
-        if isinstance(self.order, dict):
-            self.args_for_action = self.order[self.view.select_line.strip().decode('utf-8')]
+        if isinstance(self.request, dict):
+            self.args_for_action = self.request[self.view.select_line.strip().decode('utf-8')]
         else:
             self.args_for_action = self.view.select_line
         return value
@@ -131,7 +130,7 @@ class Kunai(object):
         return 1
 
     def execute_command(self):
-        """execute_command
+        """Execute command
         kunai default action
         """
         p = subprocess.Popen(
@@ -147,22 +146,19 @@ class Kunai(object):
 class Core(object):
 
     def __init__(self, function, action_name=None, **kwargs):
-        order = function()
+        request = function()
         function_name = function.__name__
         ttyname = get_ttyname()
 
-        if isinstance(order, list) or isinstance(order, dict):
-
+        if isinstance(request, (list, dict)):
             with open(ttyname, 'r+w') as tty_file:
-
-                with Kunai(
-                        function_name,
-                        order,
-                        kwargs,
-                        reconnect_descriptors(tty_file)
-                ) as kunai:
+                with Kunai(function_name,
+                           request,
+                           kwargs,
+                           reconnect_descriptors(tty_file)
+                           ) as kunai:
                     value = kunai.loop()
         else:
-            value = u"argment is not list or dict"
+            value = u'argment is not list or dict'
 
         sys.exit(value)
