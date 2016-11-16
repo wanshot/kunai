@@ -31,14 +31,25 @@ BACKGROUND_COLORS = {
 }
 
 
-def term(string, fg_color=None, bg_color=None, style=None):
+def term(message, fg_color=None, bg_color=None, style=None):
+    """Display with ANSI Attribute
+    :param message: String to be displayed
+    :param fg_color: text color
+    :param bg_color: background color
+    :param style: text style
+    :type message: str
+    :type fg_color: str
+    :type style: str
+    :rtype: str
+    """
     style = STYLE.get(style, 0)
     fg_color = FOREGROUND_COLORS.get(fg_color, 30)
     bg_color = BACKGROUND_COLORS.get(bg_color, 40)
 
     highlight = ';'.join(map(str, [style, fg_color, bg_color]))
 
-    return '\033[{0}m{1}\033[0m'.format(highlight, string)
+    return '\x1b[{attribute}m{char}\x1b[0m'.format(attribute=highlight,
+                                                   char=message)
 
 if __name__ == '__main__':
     for s, _ in sorted(STYLE.items(), key=lambda x: x[1]):

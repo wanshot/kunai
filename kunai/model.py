@@ -126,7 +126,7 @@ class Screen(object):
         return len([x for x in self.pager.current_page if x is not None])
 
     @property
-    def prompt_line(self):
+    def verbose_prompt(self):
         return self.prompt.prompt_query + self.prompt.pager_info
 
 
@@ -199,7 +199,7 @@ class Pager(object):
             if line:
                 page.append(adjust_width(line, self.width))
             else:
-                page.append(line)
+                page.append(None)
         return page
 
     def is_single_line(self):

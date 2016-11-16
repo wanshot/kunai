@@ -50,7 +50,10 @@ class View(object):
     def render_prompt(self):
         """
         """
-        self.screen.stdscr.addnstr(0, 0, self.screen.prompt_line, self.screen.width, self.display.normal)
+        self.screen.stdscr.addnstr(0, 0,
+                                   self.screen.verbose_prompt,
+                                   self.screen.width,
+                                   self.display.normal)
 
     def update(self):
         """
