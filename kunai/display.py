@@ -22,7 +22,7 @@ COLORS = {
     'white':   curses.COLOR_WHITE,
 }
 
-ATTRS = {
+STYLE = {
     'altcharset': curses.A_ALTCHARSET,
     'blink':      curses.A_BLINK,
     'bold':       curses.A_BOLD,
@@ -66,11 +66,11 @@ class Display(object):
         curses.init_pair(SELECT_HL_NUMBER, highlight_color, select_line_bg)
 
     def merge_option(self, ret, opts):
-        """ make ATTRS
+        """merge STYLE options
         """
         for k, v in opts:
             if v == 'True':
-                ret = or_(ret, ATTRS.get(k))
+                ret = or_(ret, STYLE.get(k))
         return ret
 
     @property

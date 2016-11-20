@@ -102,11 +102,15 @@ class Screen(object):
         self.create_prompt()
 
     def is_within_display_range(self, position):
+        """Check within display range
+        """
         if position in range(1, self.height):
             return True
         return False
 
     def is_none_line(self, pos_y):
+        """
+        """
         if self.pager.current_page[pos_y - 1] is None:
             return True
         return False

@@ -2,6 +2,7 @@
 
 import os
 from ConfigParser import SafeConfigParser
+from exceptions import ConfigLoadError
 
 KUNAI_ROOT_DIRECTORY = os.path.expanduser('~/.kunai.d/')
 KUNAI_CONF_PATH = KUNAI_ROOT_DIRECTORY + 'kunairc'
@@ -62,8 +63,8 @@ ENTER = select_line
 def make_tempra_config_file():
     if not os.path.exists(KUNAI_ROOT_DIRECTORY):
         os.makedirs(KUNAI_ROOT_DIRECTORY)
-    with open(KUNAI_CONF_PATH, 'w+') as file:
-        file.write(DEFAULT_CONFIG)
+    with open(KUNAI_CONF_PATH, 'w+') as f:
+        f.write(DEFAULT_CONFIG)
 
 
 class Config(object):
@@ -79,9 +80,9 @@ class Config(object):
 
     def _check_config(self):
         if not os.path.exists(KUNAI_ROOT_DIRECTORY):
-            raise IndexError('.kunai directory is not found')
+            raise ConfigLoadError('.kunai directory is not found')
         if not os.path.isfile(KUNAI_CONF_PATH):
-            raise IndexError('kunairc is not found')
+            raise ConfigLoadError('kunairc is not found')
 
     def _load(self):
         conf = SafeConfigParser()

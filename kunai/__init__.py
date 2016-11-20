@@ -17,6 +17,8 @@ from .cli import Core
 
 
 def render(*args, **kwargs):
+    """Call a function described on kunaifile
+    """
     # call @render
     if len(args) == 1 and callable(args[0]):
         return Core(args[0], **kwargs)
