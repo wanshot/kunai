@@ -24,9 +24,9 @@ BACKGROUND_COLORS = {
     'red':    41,
     'green':  42,
     'yellow': 43,
-    'blue':	  44,
+    'blue':   44,
     'purple': 45,
-    'cyan':	  46,
+    'cyan':   46,
     'white':  47,
 }
 
@@ -39,6 +39,7 @@ def term(message, fg_color=None, bg_color=None, style=None):
     :param style: text style
     :type message: str
     :type fg_color: str
+    :type bg_color: str
     :type style: str
     :rtype: str
     """
