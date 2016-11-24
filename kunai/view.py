@@ -31,7 +31,10 @@ class View(object):
                     pass
 
                 if idx == self.screen.pos_y:
-                    self.screen.stdscr.chgat(idx, self.screen.pos_x, -1, self.display.select)
+                    self.screen.stdscr.chgat(idx,
+                                             self.screen.pos_x,
+                                             -1,
+                                             self.display.select_line_attr)
             else:
                 self.screen.stdscr.move(idx, 0)
                 self.screen.stdscr.clrtoeol()
@@ -43,9 +46,13 @@ class View(object):
         for idx, line in enumerate(self.screen.current_page, start=1):
             if line is not None and self.screen.query:
                 if idx == self.screen.pos_y:
-                    self.hightlight_query(idx, line, self.display.highlight_select)
+                    self.hightlight_query(idx,
+                                          line,
+                                          self.display.highlight_select_line_attr)
                 else:
-                    self.hightlight_query(idx, line, self.display.highlight_normal)
+                    self.hightlight_query(idx,
+                                          line,
+                                          self.display.highlight_normal_line_attr)
 
     def render_prompt(self):
         """
@@ -53,7 +60,7 @@ class View(object):
         self.screen.stdscr.addnstr(0, 0,
                                    self.screen.verbose_prompt,
                                    self.screen.width,
-                                   self.display.normal)
+                                   self.display.normal_line_attr)
 
     def update(self):
         """
@@ -67,9 +74,15 @@ class View(object):
         if self.screen.is_within_display_range(new_pos_y):
             if not self.screen.is_none_line(new_pos_y):
                 # new line
-                self.screen.stdscr.chgat(new_pos_y, self.screen.pos_x, -1, self.display.select)
+                self.screen.stdscr.chgat(new_pos_y,
+                                         self.screen.pos_x,
+                                         -1,
+                                         self.display.select_line_attr)
                 # old line
-                self.screen.stdscr.chgat(self.screen.pos_y, self.screen.pos_x, -1, self.display.normal)
+                self.screen.stdscr.chgat(self.screen.pos_y,
+                                         self.screen.pos_x,
+                                         -1,
+                                         self.display.normal_line_attr)
                 # update
                 self.screen.pos_y = new_pos_y
                 self.render_hightlight_query()
@@ -85,9 +98,15 @@ class View(object):
         if self.screen.is_within_display_range(new_pos_y):
             if not self.screen.is_none_line(new_pos_y):
                 # new line
-                self.screen.stdscr.chgat(new_pos_y, self.screen.pos_x, -1, self.display.select)
+                self.screen.stdscr.chgat(new_pos_y,
+                                         self.screen.pos_x,
+                                         -1,
+                                         self.display.select_line_attr)
                 # old line
-                self.screen.stdscr.chgat(self.screen.pos_y, self.screen.pos_x, -1, self.display.normal)
+                self.screen.stdscr.chgat(self.screen.pos_y,
+                                         self.screen.pos_x,
+                                         -1,
+                                         self.display.normal_line_attr)
                 # update
                 self.screen.pos_y = new_pos_y
                 self.render_hightlight_query()
