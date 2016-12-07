@@ -46,7 +46,9 @@ class ExecFileParser(object):
         _Transform().visit(exprs)
         self.code_obj = compile(exprs, self.conf.kunai_file_path, 'exec')
 
-    def set_env_code(self, code_obj):
+    def set_importmodule_code(self, code_obj):
+        """set import module code
+        """
         source = self._uncompile(code_obj)
         s = ['from kunai import render']
         s.extend(source)
@@ -56,8 +58,8 @@ class ExecFileParser(object):
         self.code_obj = compile(exprs, '<kunai>', 'exec')
 
     def _uncompile(self, code_obj):
-        '''uncompile(codeobj) -> source
-        '''
+        """uncompile(codeobj) -> source
+        """
         if code_obj.co_flags & inspect.CO_NESTED or code_obj.co_freevars:
             # XXX
             raise TypeError('nested functions not supported')

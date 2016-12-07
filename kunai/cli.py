@@ -75,7 +75,7 @@ class Kunai(object):
             for const in self.parser.code_obj.co_consts:
                 # XXX get only action method code object
                 if isinstance(const, types.CodeType):
-                    self.parser.set_env_code(const)
+                    self.parser.set_importmodule_code(const)
                     exec(self.parser.code_obj, {
                         # set globals
                         self.render_name: self.args_for_action,

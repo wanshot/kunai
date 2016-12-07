@@ -55,23 +55,31 @@ class Display(object):
         bg = self.conf.normal_line_color.get('bg', 'black')
         normal_line_fg = COLORS.get(fg, curses.COLOR_WHITE)
         normal_line_bg = COLORS.get(bg, curses.COLOR_BLACK)
-        curses.init_pair(NORMAL_NUMBER, normal_line_fg, normal_line_bg)
-        curses.init_pair(NORMAL_HIGHLIGHT_NUMBER, highlight_color, normal_line_bg)
+        curses.init_pair(NORMAL_NUMBER,
+                         normal_line_fg,
+                         normal_line_bg)
+        curses.init_pair(NORMAL_HIGHLIGHT_NUMBER,
+                         highlight_color,
+                         normal_line_bg)
 
         # select line highlight
         fg = self.conf.select_line_color.get('fg', 'white')
         bg = self.conf.select_line_color.get('bg', 'blue')
         select_line_fg = COLORS.get(fg, curses.COLOR_WHITE)
         select_line_bg = COLORS.get(bg, curses.COLOR_BLUE)
-        curses.init_pair(SELECT_NUMBER, select_line_fg, select_line_bg)
-        curses.init_pair(SELECT_HIGHLIGHT_NUMBER, highlight_color, select_line_bg)
+        curses.init_pair(SELECT_NUMBER,
+                         select_line_fg,
+                         select_line_bg)
+        curses.init_pair(SELECT_HIGHLIGHT_NUMBER,
+                         highlight_color,
+                         select_line_bg)
 
     def merge_option(self, colors, styles):
-        """merge attrs
-        :param colors: color attribute from config file
-        :param styles: style attribute from config file
-        :type colors: curses color_pair object
-        :type styles: dict
+        """merge attributes
+
+        :param curses color_pair object colors:
+            color attribute from config file
+        :param dict styles: style attribute from config file
         """
         for k, v in styles:
             if v == 'True':
@@ -80,21 +88,21 @@ class Display(object):
 
     @property
     def normal_line_attr(self):
-        """set normal line attribute
+        """set normal line attributes
         """
         return self.merge_option(curses.color_pair(NORMAL_NUMBER),
                                  self.conf.normal_line_options.items())
 
     @property
     def select_line_attr(self):
-        """set select line attribute
+        """set select line attributes
         """
         return self.merge_option(curses.color_pair(SELECT_NUMBER),
                                  self.conf.select_line_options.items())
 
     @property
     def highlight_normal_line_attr(self):
-        """set normal highlight line attribute
+        """set normal highlight line attributes
         """
         opts = chain(
             self.conf.normal_line_options.items(),
@@ -105,7 +113,7 @@ class Display(object):
 
     @property
     def highlight_select_line_attr(self):
-        """set select highlight line attribute
+        """set select highlight line attributes
         """
         opts = chain(
             self.conf.select_line_options.items(),

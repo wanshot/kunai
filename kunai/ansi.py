@@ -33,15 +33,12 @@ BACKGROUND_COLORS = {
 
 def term(message, fg_color=None, bg_color=None, style=None):
     """Display with ANSI Attribute
-    :param message: String to be displayed
-    :param fg_color: text color
-    :param bg_color: background color
-    :param style: text style
-    :type message: str
-    :type fg_color: str
-    :type bg_color: str
-    :type style: str
-    :rtype: str
+
+    :param str message: String to be displayed
+    :param str fg_color: text color
+    :param str bg_color: background color
+    :param str style: text style
+    :return str: escape sequence character
     """
     style = STYLE.get(style, 0)
     fg_color = FOREGROUND_COLORS.get(fg_color, 30)
