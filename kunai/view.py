@@ -9,7 +9,11 @@ class View(object):
         self.screen = screen
 
     def _hightlight_query(self, lineno, line, attr):
-        """
+        """Highlight matching results in search string
+
+        :params int lineno: Line number
+        :params str line: String per line
+        :params attr: Attributes of the string to be displayed
         """
 
         for pos_x in search_query_position(line, self.screen.query):
@@ -20,7 +24,7 @@ class View(object):
                                        attr)
 
     def render_current_page(self):
-        """
+        """Display current page
         """
         for idx, line in enumerate(self.screen.current_page, start=1):
             self.screen.stdscr.addnstr(idx, 0, line, self.screen.width - 1)
@@ -31,7 +35,7 @@ class View(object):
                                          self.display.select_line_attr)
 
     def render_hightlight_query(self):
-        """
+        """Highlight the query and display it
         """
         for idx, line in enumerate(self.screen.current_page, start=1):
             if line is not None and self.screen.query:
@@ -47,7 +51,7 @@ class View(object):
                         self.display.highlight_normal_line_attr)
 
     def render_prompt(self):
-        """
+        """Display prompt
         """
         self.screen.stdscr.addnstr(0, 0,
                                    self.screen.prompt,
@@ -55,7 +59,7 @@ class View(object):
                                    self.display.normal_line_attr)
 
     def update(self):
-        """
+        """Update display
         """
         self.render_prompt()
         self.render_current_page()
@@ -103,11 +107,15 @@ class View(object):
             self.update()
 
     def backspace(self):
+        """Erase one character from the input character string
+        """
         self.screen.erase_query_char()
         self.screen.search_and_update()
         self.refresh_display()
 
     def search_query(self, ch):
+        """Enter a character string to search
+        """
         self.screen.set_query(ch)
         self.screen.search_and_update()
         self.refresh_display()

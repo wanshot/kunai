@@ -55,7 +55,7 @@ class Screen(object):
     def search_and_update(self):
         """Narrow down the target and update the value
         """
-        new_object_list = [v for v in self.object_list if self.query in v]
+        new_object_list = [ol for ol in self.object_list if self.query in ol.decode('utf-8')]
         self.paginator = Paginator(new_object_list, self.height - 1)
         self.current_page_number = 1
 

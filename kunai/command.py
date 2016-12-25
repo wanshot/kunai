@@ -6,17 +6,11 @@ class Command(object):
     Model < View < Command
     """
 
-    def __init__(self, templa, view, keyhandler):
-        self.templa = templa
-        self.view = view
-        self.execute(keyhandler)
-
-    def execute(self, keyhandler):
-        if keyhandler == 'input_query':
-            pass
-        else:
-            # XXX
-            getattr(self, keyhandler)()
+    def __init__(self, kunai):
+        self.kunai = kunai
+        self.view = kunai.view
+        if not kunai.keyhandler.has_query:
+            getattr(self, kunai.keyhandler.command)()
 
     def move_next_page(self):
         self.view.screen.move_next_page()
@@ -41,8 +35,8 @@ class Command(object):
     def select_bottom_line(self):
         pass
 
-    def exit_templa(self):
-        self.templa.cancel()
+    def exit_kunai(self):
+        self.kunai.cancel()
 
     def select_line(self):
-        self.templa.finish()
+        self.kunai.finish()

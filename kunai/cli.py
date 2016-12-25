@@ -90,14 +90,14 @@ class Kunai(object):
         self.updating_timer = None
 
         def despiction():
-            self.view.search_query(self.keyhandler.hold_key)
+            self.view.search_query(self.keyhandler.current_key)
 
         while True:
             self.view.refresh_display()
             try:
                 key = self.stdscr.getch()
                 self.keyhandler.handle_key(key)
-                if self.keyhandler.is_input_query:
+                if self.keyhandler.has_query:
                     with self.global_lock:
 
                         if self.updating_timer is not None:
@@ -109,7 +109,7 @@ class Kunai(object):
                         self.updating_timer = timer
                         timer.start()
 
-                Command(self, self.view, self.keyhandler.state)
+                Command(self)
             except TerminateLoop as e:
                 return e.value
 
@@ -130,7 +130,8 @@ class Kunai(object):
         return 1
 
     def execute_command(self):
-        """Execute command
+        """Execute action
+
         kunai default action
         """
         p = subprocess.Popen(
