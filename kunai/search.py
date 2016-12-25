@@ -4,10 +4,10 @@ from collections import defaultdict
 
 def search_query_position(line, pattern):
     """Scanning line
+
     :param str line: kunai line
     :param str pattern: match
-    :rtype: list
-    :return: Position of the matched strings
+    :return list: Position of the matched strings
     """
 
     ret = []

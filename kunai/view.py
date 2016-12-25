@@ -8,7 +8,7 @@ class View(object):
         self.display = display
         self.screen = screen
 
-    def hightlight_query(self, lineno, line, attr):
+    def _hightlight_query(self, lineno, line, attr):
         """
         """
 
@@ -22,43 +22,35 @@ class View(object):
     def render_current_page(self):
         """
         """
-
         for idx, line in enumerate(self.screen.current_page, start=1):
-            if line is not None:
-                try:
-                    self.screen.stdscr.addnstr(idx, 0, line, self.screen.width)
-                except:
-                    pass
-
-                if idx == self.screen.pos_y:
-                    self.screen.stdscr.chgat(idx,
-                                             self.screen.pos_x,
-                                             -1,
-                                             self.display.select_line_attr)
-            else:
-                self.screen.stdscr.move(idx, 0)
-                self.screen.stdscr.clrtoeol()
+            self.screen.stdscr.addnstr(idx, 0, line, self.screen.width - 1)
+            if idx == self.screen.pos_y:
+                self.screen.stdscr.chgat(idx,
+                                         self.screen.pos_x,
+                                         -1,
+                                         self.display.select_line_attr)
 
     def render_hightlight_query(self):
         """
         """
-
         for idx, line in enumerate(self.screen.current_page, start=1):
             if line is not None and self.screen.query:
                 if idx == self.screen.pos_y:
-                    self.hightlight_query(idx,
-                                          line,
-                                          self.display.highlight_select_line_attr)
+                    self._hightlight_query(
+                        idx,
+                        line,
+                        self.display.highlight_select_line_attr)
                 else:
-                    self.hightlight_query(idx,
-                                          line,
-                                          self.display.highlight_normal_line_attr)
+                    self._hightlight_query(
+                        idx,
+                        line,
+                        self.display.highlight_normal_line_attr)
 
     def render_prompt(self):
         """
         """
         self.screen.stdscr.addnstr(0, 0,
-                                   self.screen.verbose_prompt,
+                                   self.screen.prompt,
                                    self.screen.width,
                                    self.display.normal_line_attr)
 
@@ -72,23 +64,19 @@ class View(object):
     def move_down(self):
         new_pos_y = self.screen.pos_y + 1
         if self.screen.is_within_display_range(new_pos_y):
-            if not self.screen.is_none_line(new_pos_y):
-                # new line
-                self.screen.stdscr.chgat(new_pos_y,
-                                         self.screen.pos_x,
-                                         -1,
-                                         self.display.select_line_attr)
-                # old line
-                self.screen.stdscr.chgat(self.screen.pos_y,
-                                         self.screen.pos_x,
-                                         -1,
-                                         self.display.normal_line_attr)
-                # update
-                self.screen.pos_y = new_pos_y
-                self.render_hightlight_query()
-            else:
-                self.screen.move_next_page()
-                self.update()
+            # new line
+            self.screen.stdscr.chgat(new_pos_y,
+                                     self.screen.pos_x,
+                                     -1,
+                                     self.display.select_line_attr)
+            # old line
+            self.screen.stdscr.chgat(self.screen.pos_y,
+                                     self.screen.pos_x,
+                                     -1,
+                                     self.display.normal_line_attr)
+            # update
+            self.screen.pos_y = new_pos_y
+            self.render_hightlight_query()
         else:
             self.screen.move_next_page()
             self.update()
@@ -96,24 +84,22 @@ class View(object):
     def move_up(self):
         new_pos_y = self.screen.pos_y - 1
         if self.screen.is_within_display_range(new_pos_y):
-            if not self.screen.is_none_line(new_pos_y):
-                # new line
-                self.screen.stdscr.chgat(new_pos_y,
-                                         self.screen.pos_x,
-                                         -1,
-                                         self.display.select_line_attr)
-                # old line
-                self.screen.stdscr.chgat(self.screen.pos_y,
-                                         self.screen.pos_x,
-                                         -1,
-                                         self.display.normal_line_attr)
-                # update
-                self.screen.pos_y = new_pos_y
-                self.render_hightlight_query()
-        if new_pos_y == 0:
+            # new line
+            self.screen.stdscr.chgat(new_pos_y,
+                                     self.screen.pos_x,
+                                     -1,
+                                     self.display.select_line_attr)
+            # old line
+            self.screen.stdscr.chgat(self.screen.pos_y,
+                                     self.screen.pos_x,
+                                     -1,
+                                     self.display.normal_line_attr)
+            # update
+            self.screen.pos_y = new_pos_y
+            self.render_hightlight_query()
+        else:
             self.screen.move_prev_page()
             # set bottom select
-            self.screen.pos_y = self.screen.bottom_line_number
             self.update()
 
     def backspace(self):
